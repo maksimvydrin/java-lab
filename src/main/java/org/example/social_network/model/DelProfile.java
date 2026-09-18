@@ -12,7 +12,6 @@ public class DelProfile extends Profile{
         return delReason;
     }
 
-
         public String toString(){
             return "Удалён профиль:" + super.toString() + ", причина: "+ delReason;
         }
