@@ -5,6 +5,7 @@ public class FriendShip {
     private final int profile2;
     private int adjacency;
 
+    public FriendShip(int profile1, int profile2, int adjacency){
         this.profile1 = profile1;
         this.profile2 = profile2;
         this.adjacency = adjacency;
