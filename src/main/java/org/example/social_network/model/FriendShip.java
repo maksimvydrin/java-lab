@@ -1,6 +1,6 @@
 package org.example.social_network.model;
 
-public class FriendShip {
+public class FriendShip{
     private final int profile1;
     private final int profile2;
     private int adjacency;
