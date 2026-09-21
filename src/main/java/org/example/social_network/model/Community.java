@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class Community implements Editable{
+public class Community implements Editable {
     private int id;
     private String name;
     private String city;

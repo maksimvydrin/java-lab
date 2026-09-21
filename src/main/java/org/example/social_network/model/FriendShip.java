@@ -3,12 +3,12 @@ package org.example.social_network.model;
 public class FriendShip{
     private final int profile1;
     private final int profile2;
-    private int adjacency;
+    private int strength;
 
-    public FriendShip(int profile1, int profile2, int adjacency){
+    public FriendShip(int profile1, int profile2, int strength){
         this.profile1 = profile1;
         this.profile2 = profile2;
-        this.adjacency = adjacency;
+        this.strength= strength;
     }
 
     public int getProfile1() {
@@ -19,12 +19,12 @@ public class FriendShip{
         return profile2;
     }
 
-    public int getAdjacency() {
-        return adjacency;
+    public int getStrength() {
+        return strength;
     }
 
-    public void setAdjacency(int adjacency){
-        this.adjacency = adjacency;
+    public void setStrength(int strength){
+        this.strength = strength;
     }
 }
 

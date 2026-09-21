@@ -1,4 +1,4 @@
-package org.example.social_network.model;
+package org.example.social_network.graph;
 
 public class GraphNode {
     private final int ProfileId;
