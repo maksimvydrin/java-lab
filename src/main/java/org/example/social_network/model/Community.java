@@ -8,7 +8,7 @@ public class Community implements Editable {
     private int id;
     private String name;
     private String city;
-    private int birth_year;
+    private int birthYear;
     private int adminId;
 
     public Community(int id, String name, String city, int birthYear, int administratorId){
@@ -16,7 +16,7 @@ public class Community implements Editable {
         this.id = id;
         this.name = name;
         this.city = city;
-        this.birth_year = birth_year;
+        this.birthYear = birthYear;
         this.adminId = adminId;
     }
 
@@ -30,7 +30,7 @@ public class Community implements Editable {
         return city;
     }
     public int getBirthYear() {
-        return birth_year;
+        return birthYear;
     }
     public int getAdministratorId() {
         return adminId;
@@ -42,7 +42,7 @@ public class Community implements Editable {
         this.city = city;
     }
     public void setBirthYear(int birthYear) {
-        this.birth_year = birthYear;
+        this.birthYear = birthYear;
     }
     public void setAdministratorId(int administratorId) {
         this.adminId = administratorId;

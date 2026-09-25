@@ -2,7 +2,7 @@ package org.example.social_network.graph;
 
 import java.util.*;
 
-public class GraphAlgoritms {
+public class GraphAlgorithms {
     public List<Integer> bfs(Graph graph, int start, int target){
 
         Queue<Integer> queue = new LinkedList<>(); //то, что нужно посетить

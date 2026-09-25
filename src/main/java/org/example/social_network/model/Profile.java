@@ -7,13 +7,13 @@ public class Profile implements Editable {
     private int id;
     private String name;
     private String city;
-    private int birth_year;
+    private int birthYear;
 
-    public Profile(int id,String name,String city,int birth_year){
+    public Profile(int id,String name,String city,int birthYear){
         this.id = id;
         this.name = name;
         this.city = city;
-        this.birth_year = birth_year;
+        this.birthYear = birthYear;
     }
 
     public int getId(){
@@ -44,8 +44,8 @@ public class Profile implements Editable {
         this.city = city;
     }
 
-    public void setBirth_year(int birth_year){
-        this.birth_year = birth_year;
+    public void setBirthyear(int birthYear){
+        this.birthYear = birthYear;
     }
 
     public List<String> validate() {
@@ -60,10 +60,10 @@ public class Profile implements Editable {
         }
 
         if(city.isBlank()){
-            errors.add("Имя не может быть пустым");
+            errors.add("Название города не может быть пустым");
         }
 
-        if(birth_year>2026 || birth_year<1956){
+        if(birthYear>2026 || birthYear<1956){
             errors.add("Введенный год рождения некорректен");
         }
 
@@ -71,6 +71,6 @@ public class Profile implements Editable {
     }
 
     public String toString(){
-        return id+":"+name+"("+city+","+birth_year+")";
+        return id+":"+name+"("+city+","+birthYear+")";
     }
 }
