@@ -11,7 +11,7 @@ import java.util.List;
 public class ProfileCsvLoader {
     public List<Profile> load(Path file){
         List<Profile> result = new ArrayList<>();
-        try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+        try (var reader = Files.newBufferedReader(file, java.nio.charset.Charset.forName("windows-1251"))) {
             reader.readLine();
             String line;
 

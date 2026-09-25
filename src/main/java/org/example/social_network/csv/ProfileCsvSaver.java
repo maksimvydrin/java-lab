@@ -12,7 +12,7 @@ import java.util.List;
 public class ProfileCsvSaver {
 
     public void save(List<Profile> profiles, Path file) {
-        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+        try (BufferedWriter writer = Files.newBufferedWriter(file, java.nio.charset.Charset.forName("windows-1251"))) {
 
             writer.write("id;name;city;birthYear");
             writer.newLine();
