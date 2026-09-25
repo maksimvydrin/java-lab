@@ -28,8 +28,8 @@ public class Profile implements Editable {
         return city;
     }
 
-    public int getBirth_year(){
-        return id;
+    public int getBirthYear(){
+        return birthYear;
     }
 
     public void setId(int id){
@@ -44,7 +44,7 @@ public class Profile implements Editable {
         this.city = city;
     }
 
-    public void setBirthyear(int birthYear){
+    public void setBirthYear(int birthYear){
         this.birthYear = birthYear;
     }
 
