@@ -1,6 +1,5 @@
 package org.example.social_network.csv;
-
-import org.example.social_network.model.Profile;
+import org.example.social_network.model.DelProfile;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -9,15 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class ProfileCsvSaver {
+public class DelProfileCsvSaver {
 
-    public void save(List<Profile> profiles, Path file) {
+    public void save(List<DelProfile> profiles, Path file) {
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
-
-            writer.write("id;name;city;birthYear");
+            writer.write("id;name;city;birthYear;delReason");
             writer.newLine();
-
-            for (Profile profile : profiles) {
+            for (DelProfile profile : profiles) {
                 writer.write(Integer.toString(profile.getId()));
                 writer.write(";");
                 writer.write(clean(profile.getName()));
@@ -25,22 +22,22 @@ public class ProfileCsvSaver {
                 writer.write(clean(profile.getCity()));
                 writer.write(";");
                 writer.write(Integer.toString(profile.getBirthYear()));
+                writer.write(";");
+                writer.write(clean(profile.getDelReason()));
                 writer.newLine();
             }
-
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("Ошибка записи файла: " + file, e);
         }
     }
 
     private String clean(String value) {
-        if (value == null) {
+        if (value == null)
+        {
             return "";
         }
 
-        return value
-                .replace(";", ",")
-                .replace("\r", " ")
-                .replace("\n", " ");
+        return value.replace(";", ",").replace("\r", " ").replace("\n", " ");
     }
 }

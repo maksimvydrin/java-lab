@@ -34,6 +34,54 @@ public class GraphAlgorithms {
         return buildPath(previous, start, target);
     }
 
+    public List<Integer> deikstra(Graph graph,int start, int target){
+        Map<Integer,Integer> distance = new HashMap<>();
+        Map<Integer,Integer> previous = new HashMap<>();
+        Set<Integer> visited  = new HashSet<>();
+
+        for(Integer vertex: graph.adjacency.keySet()){
+            distance.put(vertex,Integer.MAX_VALUE);
+        }
+
+        if(!distance.containsKey(start)||!distance.containsKey(target)){
+            return new ArrayList<>();
+        }
+
+        distance.put(start,0);
+
+        while(visited.size() < graph.adjacency.size()){
+            int current = -1;
+            int minDistance = Integer.MAX_VALUE;
+
+            for(Integer vertex:distance.keySet()){
+                if(!visited.contains(vertex) && distance.get(vertex)<minDistance){
+                    current = vertex;
+                    minDistance=distance.get(vertex);
+                }
+            }
+
+            if(current == -1){
+                break;
+            }
+
+            if(current==target){
+                break;
+            }
+
+            visited.add(current);
+            GraphNode neighbor = graph.adjacency.get(current);
+            while(neighbor!=null){
+                int next=neighbor.getProfileId();
+
+
+            }
+
+
+
+        }
+
+    }
+
     private List<Integer>buildPath(Map<Integer,Integer>previous,int start,int target) {
         List<Integer> path = new ArrayList<>();
         int current = target;
