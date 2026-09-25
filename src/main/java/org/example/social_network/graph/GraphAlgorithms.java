@@ -62,17 +62,17 @@ public class GraphAlgorithms {
             if(current == -1){
                 break;
             }
+            visited.add(current);
             if(current==target){
                 break;
             }
-            visited.add(current);
             GraphNode neighbor = graph.adjacency.get(current);
             while(neighbor!=null){
                 int next=neighbor.getProfileId();
                 String key = Math.min(current,next)+":"+Math.max(current,next);
-                int stength = graph.strengths.getOrDefault(key,1);
+                int strength = graph.strengths.getOrDefault(key,1);
                 if(!visited.contains(next)){
-                    int newDistance = distance.get(current)+stength;
+                    int newDistance = distance.get(current)+strength;
                     if(newDistance<distance.get(next)){
                         distance.put(next,newDistance);
                         previous.put(next,current);
