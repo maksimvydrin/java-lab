@@ -59,27 +59,30 @@ public class GraphAlgorithms {
                     minDistance=distance.get(vertex);
                 }
             }
-
             if(current == -1){
                 break;
             }
-
             if(current==target){
                 break;
             }
-
             visited.add(current);
             GraphNode neighbor = graph.adjacency.get(current);
             while(neighbor!=null){
                 int next=neighbor.getProfileId();
-
-
+                String key = Math.min(current,next)+":"+Math.max(current,next);
+                int stength = graph.strengths.getOrDefault(key,1);
+                if(!visited.contains(next)){
+                    int newDistance = distance.get(current)+stength;
+                    if(newDistance<distance.get(next)){
+                        distance.put(next,newDistance);
+                        previous.put(next,current);
+                    }
+                }
+            neighbor = neighbor.getNext();
             }
 
-
-
         }
-
+    return buildPath(previous,start,target);
     }
 
     private List<Integer>buildPath(Map<Integer,Integer>previous,int start,int target) {
@@ -89,12 +92,9 @@ public class GraphAlgorithms {
             if (!previous.containsKey(current)) {
                 return new ArrayList<>();
             }
-
             path.add(current);
             current = previous.get(current);
-
         }
-
         path.add(start);
         Collections.reverse(path);
         return path;
