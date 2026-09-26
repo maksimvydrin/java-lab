@@ -47,9 +47,8 @@ public class MainApp extends Application {
                 )
         );
 
-        // =========================
         // Колонка города
-        // =========================
+
 
         TableColumn<Profile, String> cityColumn =
                 new TableColumn<>("Город");
@@ -60,9 +59,7 @@ public class MainApp extends Application {
                 )
         );
 
-        // =========================
         // Колонка года рождения
-        // =========================
 
         TableColumn<Profile, Number> yearColumn =
                 new TableColumn<>("Год рождения");
@@ -80,9 +77,9 @@ public class MainApp extends Application {
                 yearColumn
         );
 
-        // =========================
+
         // Тестовые данные
-        // =========================
+
 
         Profile profile1 =
                 new Profile(1, "Иван", "Москва", 2000);
@@ -101,9 +98,9 @@ public class MainApp extends Application {
                 )
         );
 
-        // =========================
+
         // Выбор типа
-        // =========================
+
 
         ComboBox<String> typeBox =
                 new ComboBox<>();
@@ -116,9 +113,7 @@ public class MainApp extends Application {
 
         typeBox.setValue("Profile");
 
-        // =========================
         // Кнопки
-        // =========================
 
         Button addButton =
                 new Button("Добавить");
@@ -295,9 +290,9 @@ public class MainApp extends Application {
         Button dijkstraButton =
                 new Button("Dijkstra");
 
-        // =========================
+
         // Кнопка Добавить
-        // =========================
+
 
         addButton.setOnAction(event -> {
 
@@ -344,9 +339,9 @@ public class MainApp extends Application {
                     cancelButton
             );
 
-            // =========================
+
             // Поля формы
-            // =========================
+
 
             TextField idField =
                     new TextField();
@@ -422,9 +417,9 @@ public class MainApp extends Application {
             dialog.getDialogPane()
                     .setContent(grid);
 
-            // =========================
+
             // Что происходит при OK
-            // =========================
+
 
             dialog.setResultConverter(button -> {
 
@@ -522,9 +517,8 @@ public class MainApp extends Application {
             );
         });
 
-        // =========================
+
 // Кнопка Изменить
-// =========================
 
         editButton.setOnAction(event -> {
 
@@ -593,9 +587,8 @@ public class MainApp extends Application {
                     cancelButton
             );
 
-            // =========================
             // Поля
-            // =========================
+
 
             TextField idField =
                     new TextField(
@@ -681,9 +674,9 @@ public class MainApp extends Application {
             dialog.getDialogPane()
                     .setContent(grid);
 
-            // =========================
+
             // Сохранение изменений
-            // =========================
+
 
             dialog.setResultConverter(button -> {
 
@@ -767,9 +760,9 @@ public class MainApp extends Application {
             );
         });
 
-        // =========================
+
         // Верхняя панель
-        // =========================
+
 
         HBox topPanel =
                 new HBox(
@@ -784,9 +777,9 @@ public class MainApp extends Application {
                         dijkstraButton
                 );
 
-        // =========================
+
         // Главное окно
-        // =========================
+
 
         BorderPane root =
                 new BorderPane();
