@@ -17,7 +17,7 @@ public class Community implements Editable {
         this.name = name;
         this.city = city;
         this.birthYear = birthYear;
-        this.adminId = adminId;
+        this.adminId = administratorId;
     }
 
     public int getId() {
