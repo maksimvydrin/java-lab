@@ -1,5 +1,4 @@
 package org.example.social_network.gui;
-
 import org.example.social_network.csv.CommunityCsvLoader;
 import org.example.social_network.csv.DelProfileCsvLoader;
 import org.example.social_network.model.FriendShip;
@@ -26,7 +25,7 @@ import org.example.social_network.model.Profile;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
+//test commit
 public class MainApp extends Application {
 
     private final TableView<Profile> profileTable =
