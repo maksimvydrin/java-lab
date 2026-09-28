@@ -1,4 +1,4 @@
-package org.example.social_network.gui;
+package org.example.social_network.gui
 import org.example.social_network.csv.CommunityCsvLoader;
 import org.example.social_network.csv.DelProfileCsvLoader;
 import org.example.social_network.model.FriendShip;
