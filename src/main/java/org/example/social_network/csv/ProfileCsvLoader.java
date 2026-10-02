@@ -4,7 +4,7 @@ import org.example.social_network.exception.*;
 import org.example.social_network.model.Profile;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ public class ProfileCsvLoader {
         List<Profile> result = new ArrayList<>();
         List<LoadCsvException> errors = new ArrayList<>();
 
-        try (var reader = Files.newBufferedReader(file, Charset.forName("windows-1251"))) {
+        try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
             reader.readLine();
             String line;
             int lineNumber = 1;
