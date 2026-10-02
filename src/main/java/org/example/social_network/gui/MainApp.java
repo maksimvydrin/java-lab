@@ -68,14 +68,7 @@ public class MainApp extends javafx.application.Application {
                 .selectedItemProperty()
                 .addListener((obs, oldValue, newValue) -> updateEditButton());
 
-        HBox controls = new HBox(
-                10,
-                typeBox,
-                addButton,
-                editButton,
-                loadButton,
-                saveButton
-        );
+        HBox controls = new HBox(10, typeBox, addButton, editButton, loadButton, saveButton);
 
         VBox root = new VBox(10, controls, table);
         root.setPadding(new Insets(10));
@@ -128,10 +121,7 @@ public class MainApp extends javafx.application.Application {
         TableColumn<Object, Object> column = new TableColumn<>(title);
 
         column.setCellValueFactory(cell ->
-                new javafx.beans.property.SimpleObjectProperty<>(
-                        getter.apply((T) cell.getValue())
-                ));
-
+                new javafx.beans.property.SimpleObjectProperty<>(getter.apply((T) cell.getValue())));
         table.getColumns().add(column);
     }
 
@@ -228,8 +218,7 @@ public class MainApp extends javafx.application.Application {
         dialog.getDialogPane().getButtonTypes()
                 .addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        ButtonType resultButton = dialog.showAndWait()
-                .orElse(ButtonType.CANCEL);
+        ButtonType resultButton = dialog.showAndWait().orElse(ButtonType.CANCEL);
 
         if (resultButton != ButtonType.OK) {
             return null;
@@ -317,11 +306,9 @@ public class MainApp extends javafx.application.Application {
         grid.add(adminId, 1, 4);
 
         dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes()
-                .addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        ButtonType resultButton = dialog.showAndWait()
-                .orElse(ButtonType.CANCEL);
+        ButtonType resultButton = dialog.showAndWait().orElse(ButtonType.CANCEL);
 
         if (resultButton != ButtonType.OK) {
             return null;
@@ -382,21 +369,15 @@ public class MainApp extends javafx.application.Application {
 
             switch (typeBox.getValue()) {
                 case PROFILE:
-                    profiles.setAll(
-                            new ProfileCsvLoader().load(path)
-                    );
+                    profiles.setAll(new ProfileCsvLoader().load(path));
                     break;
 
                 case COMMUNITY:
-                    communities.setAll(
-                            new CommunityCsvLoader().load(path)
-                    );
+                    communities.setAll(new CommunityCsvLoader().load(path));
                     break;
 
                 case DELETED:
-                    deleted.setAll(
-                            new DelProfileCsvLoader().load(path)
-                    );
+                    deleted.setAll(new DelProfileCsvLoader().load(path));
                     break;
             }
 
