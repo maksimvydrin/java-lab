@@ -12,7 +12,7 @@ public class CommunityCsvSaver {
     public void save(List<Community> communities, Path file) {
         try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
 
-            writer.write("id;name;city;birthYear,adminId");
+            writer.write("id;name;city;birthYear;adminId");
             writer.newLine();
 
             for (Community community : communities) {
@@ -23,9 +23,9 @@ public class CommunityCsvSaver {
                 writer.write(clean(community.getCity()));
                 writer.write(";");
                 writer.write(Integer.toString(community.getBirthYear()));
-                writer.newLine();
-                writer.write(Integer.toString(community.getAdministratorId()));
                 writer.write(";");
+                writer.write(Integer.toString(community.getAdministratorId()));
+                writer.newLine();
             }
 
         } catch (IOException e) {
