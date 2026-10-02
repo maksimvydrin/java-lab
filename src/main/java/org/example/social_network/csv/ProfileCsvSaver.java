@@ -2,6 +2,7 @@ package org.example.social_network.csv;
 
 import org.example.social_network.model.Profile;
 
+import java.nio.charset.StandardCharsets;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -12,8 +13,7 @@ import java.util.List;
 public class ProfileCsvSaver {
 
     public void save(List<Profile> profiles, Path file) {
-        try (BufferedWriter writer = Files.newBufferedWriter(file, java.nio.charset.Charset.forName("windows-1251"))) {
-
+        try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
             writer.write("id;name;city;birthYear");
             writer.newLine();
 
