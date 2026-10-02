@@ -411,6 +411,8 @@ public class MainApp extends javafx.application.Application {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Сохранить CSV");
 
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV файлы", "*.csv"));
+
         File file = chooser.showSaveDialog(stage);
 
         if (file == null) {
