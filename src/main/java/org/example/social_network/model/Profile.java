@@ -48,28 +48,25 @@ public class Profile implements Editable {
         this.birthYear = birthYear;
     }
 
+    @Override
     public List<String> validate() {
         List<String>errors = new ArrayList<>();
 
         if(id<=0){
             errors.add("ID должно быть > 0");
         }
-
         if(name.isBlank()){
             errors.add("Имя не может быть пустым");
         }
-
         if(city.isBlank()){
             errors.add("Название города не может быть пустым");
         }
-
         if(birthYear>2026 || birthYear<1956){
             errors.add("Введенный год рождения некорректен");
         }
-
         return errors;
     }
-
+    @Override
     public String toString(){
         return id+":"+name+"("+city+","+birthYear+")";
     }

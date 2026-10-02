@@ -12,6 +12,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.social_network.csv.*;
 import org.example.social_network.model.*;
+import org.example.social_network.exception.LoadCsvException;
+import org.example.social_network.exception.LoadCsvResult;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -22,7 +24,8 @@ public class MainApp extends javafx.application.Application {
     enum Type {
         PROFILE("Профили"),
         COMMUNITY("Сообщества"),
-        DELETED("Удалённые профили");
+        DELETED("Удалённые профили"),
+        FRIENDSHIP("Дружба");
 
         final String title;
 
@@ -43,6 +46,9 @@ public class MainApp extends javafx.application.Application {
             FXCollections.observableArrayList();
 
     private final ObservableList<DelProfile> deleted =
+            FXCollections.observableArrayList();
+
+    private final ObservableList<FriendShip> friendships =
             FXCollections.observableArrayList();
 
     private final TableView<Object> table = new TableView<>();
@@ -109,6 +115,13 @@ public class MainApp extends javafx.application.Application {
                 addColumn("Причина", DelProfile::getDelReason);
                 table.setItems(FXCollections.observableArrayList(deleted));
                 break;
+
+            case FRIENDSHIP:
+                addColumn("Профиль 1", FriendShip::getProfile1);
+                addColumn("Профиль 2", FriendShip::getProfile2);
+                addColumn("Сила связи", FriendShip::getStrength);
+                table.setItems(FXCollections.observableArrayList(friendships));
+                break;
         }
 
         updateEditButton();
@@ -148,11 +161,17 @@ public class MainApp extends javafx.application.Application {
                 profiles.add(profile);
                 refreshTable();
             }
-        } else {
+        } else if (typeBox.getValue() == Type.COMMUNITY) {
             Community community = communityDialog(stage, null);
 
             if (community != null) {
                 communities.add(community);
+                refreshTable();
+            }
+        } else {
+            FriendShip friendship = friendshipDialog(stage, null);
+            if (friendship != null) {
+                friendships.add(friendship);
                 refreshTable();
             }
         }
@@ -161,16 +180,23 @@ public class MainApp extends javafx.application.Application {
     private void editEntity(Stage stage) {
         Object selected = table.getSelectionModel().getSelectedItem();
 
-        if (selected instanceof Profile) {
+        if (selected instanceof Community) {
+            Community community = (Community) selected;
+            Community result = communityDialog(stage, community);
+
+            if (result != null) {
+                refreshTable();
+            }
+        } else if (selected instanceof Profile) {
             Profile profile = (Profile) selected;
             Profile result = profileDialog(stage, profile);
 
             if (result != null) {
                 refreshTable();
             }
-        } else if (selected instanceof Community) {
-            Community community = (Community) selected;
-            Community result = communityDialog(stage, community);
+        } else if (selected instanceof FriendShip) {
+            FriendShip friendship = (FriendShip) selected;
+            FriendShip result = friendshipDialog(stage, friendship);
 
             if (result != null) {
                 refreshTable();
@@ -354,71 +380,145 @@ public class MainApp extends javafx.application.Application {
         }
     }
 
+    private FriendShip friendshipDialog(Stage owner, FriendShip friendship) {
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.initOwner(owner);
+        dialog.setTitle(friendship == null ? "Добавить дружбу" : "Изменить дружбу");
+
+        TextField profile1 = new TextField();
+        TextField profile2 = new TextField();
+        TextField strength = new TextField();
+
+        if (friendship != null) {
+            profile1.setText(String.valueOf(friendship.getProfile1()));
+            profile2.setText(String.valueOf(friendship.getProfile2()));
+            strength.setText(String.valueOf(friendship.getStrength()));
+            profile1.setDisable(true);
+            profile2.setDisable(true);
+        }
+
+        GridPane grid = grid();
+        grid.add(new Label("Профиль 1:"), 0, 0);
+        grid.add(profile1, 1, 0);
+        grid.add(new Label("Профиль 2:"), 0, 1);
+        grid.add(profile2, 1, 1);
+        grid.add(new Label("Сила связи:"), 0, 2);
+        grid.add(strength, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        ButtonType resultButton = dialog.showAndWait().orElse(ButtonType.CANCEL);
+        if (resultButton != ButtonType.OK) {
+            return null;
+        }
+
+        try {
+            int id1 = Integer.parseInt(profile1.getText());
+            int id2 = Integer.parseInt(profile2.getText());
+            int value = Integer.parseInt(strength.getText());
+
+            FriendShip result;
+            if (friendship == null) {
+                result = new FriendShip(id1, id2, value);
+            } else {
+                result = friendship;
+                result.setStrength(value);
+            }
+
+            List<String> errors = result.validate();
+            if (!errors.isEmpty()) {
+                alert(String.join("\n", errors));
+                return null;
+            }
+
+            return result;
+        } catch (NumberFormatException e) {
+            alert("ID профилей и сила связи должны быть числами.");
+            return null;
+        }
+    }
+
     private void loadCsv(Stage stage) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Загрузить CSV");
 
         File file = chooser.showOpenDialog(stage);
-
         if (file == null) {
             return;
         }
 
         try {
             Path path = file.toPath();
+            StringBuilder errorsText = new StringBuilder();
 
             switch (typeBox.getValue()) {
-                case PROFILE:
-                    profiles.setAll(new ProfileCsvLoader().load(path));
-                    break;
-
-                case COMMUNITY:
-                    communities.setAll(new CommunityCsvLoader().load(path));
-                    break;
-
-                case DELETED:
-                    deleted.setAll(new DelProfileCsvLoader().load(path));
-                    break;
+                case PROFILE -> {
+                    LoadCsvResult<Profile> result = new ProfileCsvLoader().load(path);
+                    profiles.setAll(result.getItems());
+                    appendErrors(errorsText, result);
+                }
+                case COMMUNITY -> {
+                    LoadCsvResult<Community> result = new CommunityCsvLoader().load(path);
+                    communities.setAll(result.getItems());
+                    appendErrors(errorsText, result);
+                }
+                case DELETED -> {
+                    LoadCsvResult<DelProfile> result = new DelProfileCsvLoader().load(path);
+                    deleted.setAll(result.getItems());
+                    appendErrors(errorsText, result);
+                }
+                case FRIENDSHIP -> {
+                    LoadCsvResult<FriendShip> result = new FriendShipCsvLoader().load(path);
+                    friendships.setAll(result.getItems());
+                    appendErrors(errorsText, result);
+                }
             }
 
             refreshTable();
 
+            if (errorsText.length() > 0) {
+                alert("Некоторые строки пропущены:\n" + errorsText);
+            }
+        } catch (LoadCsvException e) {
+            alert(formatError(e));
         } catch (Exception e) {
             alert("Ошибка загрузки: " + e.getMessage());
         }
     }
 
+    private void appendErrors(StringBuilder builder, LoadCsvResult<?> result) {
+        result.getErrors().forEach(error ->
+                builder.append(formatError(error)).append("\n"));
+    }
+
+    private String formatError(LoadCsvException e) {
+        if (e.getLineNumber() > 0) {
+            return "Строка " + e.getLineNumber() + " [" + e.getCode() + "]: " + e.getMessage();
+        }
+        return "[" + e.getCode() + "]: " + e.getMessage();
+    }
+
     private void saveCsv(Stage stage) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Сохранить CSV");
-
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV файлы", "*.csv"));
+        chooser.getExtensionFilters().add(
+                new FileChooser.ExtensionFilter("CSV файлы", "*.csv"));
 
         File file = chooser.showSaveDialog(stage);
-
         if (file == null) {
             return;
         }
 
         try {
             Path path = file.toPath();
-
             switch (typeBox.getValue()) {
-                case PROFILE:
-                    new ProfileCsvSaver().save(profiles, path);
-                    break;
-
-                case COMMUNITY:
-                    new CommunityCsvSaver().save(communities, path);
-                    break;
-
-                case DELETED:
-                    new DelProfileCsvSaver().save(deleted, path);
-                    break;
+                case PROFILE -> new ProfileCsvSaver().save(profiles, path);
+                case COMMUNITY -> new CommunityCsvSaver().save(communities, path);
+                case DELETED -> new DelProfileCsvSaver().save(deleted, path);
+                case FRIENDSHIP -> new FriendShipCsvSaver().save(friendships, path);
             }
-
             alert("Файл сохранён.");
-
         } catch (Exception e) {
             alert("Ошибка сохранения: " + e.getMessage());
         }
