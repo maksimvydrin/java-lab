@@ -21,7 +21,7 @@ public class Community extends Profile implements Editable {
 
     @Override
     public List<String> validate() {
-        List<String> errors = new ArrayList<>(super.validate());
+        List<String> errors = new ArrayList<>();
 
         if (adminId <= 0) {
             errors.add("ID администратора некорректен");

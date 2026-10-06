@@ -1,53 +1,42 @@
 package org.example.social_network.model;
 
-public class DelProfile {
-    private final int id;
-    private final String name;
-    private final String city;
-    private final int birthYear;
-    private final String delReason;
+import java.util.ArrayList;
+import java.util.List;
 
-    public DelProfile(int id, String name, String city, int birthYear, String delReason)
-    {
-        this.id = id;
-        this.name = name;
-        this.city = city;
-        this.birthYear = birthYear;
-        this.delReason = delReason;
+public class DelProfile extends Profile {
+    private String delReason;
+    private int dayDel;
+
+    public DelProfile(final int id, final String name, final String city, final int birthYear, final int dayDel, final String Reason) {
+        super(id, name, city, birthYear);
+        this.delReason = Reason;
+        this.dayDel = dayDel;
     }
 
-    public int getId()
-    {
-        return id;
-    }
-
-    public String getName()
-    {
-        return name;
-    }
-
-    public String getCity()
-    {
-        return city;
-    }
-
-    public int getBirthYear()
-    {
-        return birthYear;
-    }
-
-    public String getDelReason()
-    {
+    public String getDelReason() {
         return delReason;
     }
 
+    public int getDayDel() {
+        return dayDel;
+    }
+
+    public void setDayDel(int dayDel) {
+        this.dayDel = dayDel;
+    }
+
     @Override
-    public String toString()
-    {
-        return "Удалённый профиль: "
-                + id + ": "
-                + name
-                + " (" + city + ", " + birthYear + ")"
-                + ", причина: " + delReason;
+    public List<String> validate(){
+        List<String> errors = new ArrayList<>(super.validate());
+
+        if(delReason.isEmpty()){
+            errors.add("Причина не может быть пустой");
+            }
+        return errors;
+    }
+
+    @Override
+    public String toString() {
+        return(getId()+":"+getName()+"("+getCity()+","+getBirthYear()+")"+"причина: "+delReason);
     }
 }

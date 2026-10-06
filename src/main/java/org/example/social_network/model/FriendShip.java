@@ -49,7 +49,6 @@ public class FriendShip implements Editable {
         if (strength < 0) {
             errors.add("Сила связи не может быть отрицательной");
         }
-
         return errors;
     }
 }

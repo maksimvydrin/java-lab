@@ -24,13 +24,9 @@ public class CommunityCsvLoader {
 
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
-                try {
-                    String[] parts = line.split(";", -1);
+                try {String[] parts = line.split(";", -1);
                     if (parts.length != 5) {
-                        throw new LoadCsvException(
-                                ErrorCsv.WRONG_FIELD_COUNT,
-                                lineNumber,
-                                "Ожидалось 5 полей, получено " + parts.length);
+                        throw new LoadCsvException(ErrorCsv.WRONG_FIELD_COUNT, lineNumber, "необходимо 5 полей, получено " + parts.length);
                     }
 
                     int id = parseInt(parts[0], lineNumber, "ID");

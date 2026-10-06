@@ -26,37 +26,34 @@ public class DelProfileCsvLoader {
                 lineNumber++;
                 try {
                     String[] parts = line.split(";", -1);
-                    if (parts.length != 5) {
+                    if (parts.length != 6) {
                         throw new LoadCsvException(
                                 ErrorCsv.WRONG_FIELD_COUNT,
                                 lineNumber,
-                                "Ожидалось 5 полей, получено " + parts.length);
+                                "Ожидалось 6 полей, получено " + parts.length);
                     }
 
                     int id = parseInt(parts[0], lineNumber, "ID");
                     String name = parts[1].trim();
                     String city = parts[2].trim();
                     int birthYear = parseInt(parts[3], lineNumber, "год рождения");
-                    String delReason = parts[4].trim();
+                    int dayDel = parseInt(parts[4], lineNumber,"Дата удаления");
+                    String delReason = parts[5].trim();
 
-                    if (name.isBlank() || city.isBlank() || delReason.isBlank()) {
+                    if (name.isEmpty() || city.isEmpty() || delReason.isEmpty()) {
                         throw new LoadCsvException(
                                 ErrorCsv.INVALID_DATA,
                                 lineNumber,
                                 "Имя, город и причина удаления не могут быть пустыми");
                     }
 
-                    result.add(new DelProfile(id, name, city, birthYear, delReason));
+                    result.add(new DelProfile(id, name, city, birthYear,dayDel,delReason));
                 } catch (LoadCsvException e) {
                     errors.add(e);
                 }
             }
         } catch (IOException e) {
-            throw new LoadCsvException(
-                    ErrorCsv.IO_ERROR,
-                    0,
-                    "Ошибка чтения файла: " + file,
-                    e);
+            throw new LoadCsvException(ErrorCsv.IO_ERROR, 0, "Ошибка чтения файла: " + file, e);
         }
 
         return new LoadCsvResult<>(result, errors);

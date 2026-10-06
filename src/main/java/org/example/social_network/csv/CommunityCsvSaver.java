@@ -38,9 +38,6 @@ public class CommunityCsvSaver {
             return "";
         }
 
-        return value
-                .replace(";", ",")
-                .replace("\r", " ")
-                .replace("\n", " ");
+        return value.replace(";", ",").replace("\r", " ").replace("\n", " ");
     }
 }

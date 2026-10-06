@@ -70,9 +70,7 @@ public class MainApp extends javafx.application.Application {
         loadButton.setOnAction(e -> loadCsv(stage));
         saveButton.setOnAction(e -> saveCsv(stage));
 
-        table.getSelectionModel()
-                .selectedItemProperty()
-                .addListener((obs, oldValue, newValue) -> updateEditButton());
+        table.getSelectionModel().selectedItemProperty().addListener((obs, oldValue, newValue) -> updateEditButton());
 
         HBox controls = new HBox(10, typeBox, addButton, editButton, loadButton, saveButton);
 

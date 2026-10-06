@@ -6,4 +6,3 @@ public enum ErrorCsv {
     INVALID_DATA,
     IO_ERROR
 }
-
