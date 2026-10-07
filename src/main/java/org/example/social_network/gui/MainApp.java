@@ -1,8 +1,7 @@
-package org.example.social_network.gui;
+package org.example.socialnetwork.gui;
 
+import javafx.application.Application;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
@@ -10,26 +9,24 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import org.example.social_network.csv.*;
-import org.example.social_network.model.*;
-import org.example.social_network.exception.LoadCsvException;
-import org.example.social_network.exception.LoadCsvResult;
+import org.example.socialnetwork.csv.*;
+import org.example.socialnetwork.model.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
-public class MainApp extends javafx.application.Application {
-
-    enum Type {
+public final class MainApp extends Application {
+    private enum EntityType {
         PROFILE("Профили"),
-        COMMUNITY("Сообщества"),
-        DELETED("Удалённые профили"),
-        FRIENDSHIP("Дружба");
+        DELETED_PROFILE("Удалённые профили"),
+        COMMUNITY("Сообщества");
 
-        final String title;
+        private final String title;
 
-        Type(String title) {
+        EntityType(String title) {
             this.title = title;
         }
 
@@ -39,50 +36,40 @@ public class MainApp extends javafx.application.Application {
         }
     }
 
-    private final ObservableList<Profile> profiles =
-            FXCollections.observableArrayList();
-
-    private final ObservableList<Community> communities =
-            FXCollections.observableArrayList();
-
-    private final ObservableList<DelProfile> deleted =
-            FXCollections.observableArrayList();
-
-    private final ObservableList<FriendShip> friendships =
-            FXCollections.observableArrayList();
+    private final List<Profile> profiles = new ArrayList<>();
+    private final List<DeletedProfile> deletedProfiles = new ArrayList<>();
+    private final List<Community> communities = new ArrayList<>();
 
     private final TableView<Object> table = new TableView<>();
-    private final ComboBox<Type> typeBox = new ComboBox<>();
+    private final ComboBox<EntityType> typeBox = new ComboBox<>();
     private final Button editButton = new Button("Изменить");
 
     @Override
     public void start(Stage stage) {
-        typeBox.getItems().addAll(Type.values());
-        typeBox.setValue(Type.PROFILE);
+        typeBox.getItems().setAll(EntityType.values());
+        typeBox.setValue(EntityType.PROFILE);
 
         Button addButton = new Button("Добавить");
         Button loadButton = new Button("Загрузить CSV");
         Button saveButton = new Button("Сохранить CSV");
 
-        typeBox.setOnAction(e -> refreshTable());
-        addButton.setOnAction(e -> addEntity(stage));
-        editButton.setOnAction(e -> editEntity(stage));
-        loadButton.setOnAction(e -> loadCsv(stage));
-        saveButton.setOnAction(e -> saveCsv(stage));
+        typeBox.setOnAction(event -> refreshTable());
+        addButton.setOnAction(event -> addEntity(stage));
+        editButton.setOnAction(event -> editEntity(stage));
+        loadButton.setOnAction(event -> loadCsv(stage));
+        saveButton.setOnAction(event -> saveCsv(stage));
 
-        table.getSelectionModel()
-                .selectedItemProperty()
+        table.getSelectionModel().selectedItemProperty()
                 .addListener((obs, oldValue, newValue) -> updateEditButton());
 
         HBox controls = new HBox(10, typeBox, addButton, editButton, loadButton, saveButton);
-
         VBox root = new VBox(10, controls, table);
-        root.setPadding(new Insets(10));
+        root.setStyle("-fx-padding: 12;");
 
         refreshTable();
 
-        stage.setTitle("Социальная сеть");
-        stage.setScene(new Scene(root, 900, 600));
+        stage.setTitle("Социальная сеть — лабораторная №1");
+        stage.setScene(new Scene(root, 900, 560));
         stage.show();
     }
 
@@ -90,457 +77,299 @@ public class MainApp extends javafx.application.Application {
         table.getColumns().clear();
 
         switch (typeBox.getValue()) {
-            case PROFILE:
+            case PROFILE -> {
                 addColumn("ID", Profile::getId);
                 addColumn("Имя", Profile::getName);
                 addColumn("Город", Profile::getCity);
                 addColumn("Год рождения", Profile::getBirthYear);
                 table.setItems(FXCollections.observableArrayList(profiles));
-                break;
-
-            case COMMUNITY:
+            }
+            case DELETED_PROFILE -> {
+                addColumn("ID", DeletedProfile::getId);
+                addColumn("Имя", DeletedProfile::getName);
+                addColumn("Город", DeletedProfile::getCity);
+                addColumn("Год рождения", DeletedProfile::getBirthYear);
+                addColumn("Причина", DeletedProfile::getReason);
+                table.setItems(FXCollections.observableArrayList(deletedProfiles));
+            }
+            case COMMUNITY -> {
                 addColumn("ID", Community::getId);
                 addColumn("Название", Community::getName);
                 addColumn("Город", Community::getCity);
                 addColumn("Год создания", Community::getBirthYear);
                 addColumn("Администратор", Community::getAdministratorId);
                 table.setItems(FXCollections.observableArrayList(communities));
-                break;
-
-            case DELETED:
-                addColumn("ID", DelProfile::getId);
-                addColumn("Имя", DelProfile::getName);
-                addColumn("Город", DelProfile::getCity);
-                addColumn("Год рождения", DelProfile::getBirthYear);
-                addColumn("Причина", DelProfile::getDelReason);
-                table.setItems(FXCollections.observableArrayList(deleted));
-                break;
-
-            case FRIENDSHIP:
-                addColumn("Профиль 1", FriendShip::getProfile1);
-                addColumn("Профиль 2", FriendShip::getProfile2);
-                addColumn("Сила связи", FriendShip::getStrength);
-                table.setItems(FXCollections.observableArrayList(friendships));
-                break;
+            }
         }
 
         updateEditButton();
     }
 
-    private <T> void addColumn(
-            String title,
-            java.util.function.Function<T, Object> getter) {
-
+    private <T> void addColumn(String title, java.util.function.Function<T, Object> getter) {
         TableColumn<Object, Object> column = new TableColumn<>(title);
-
         column.setCellValueFactory(cell ->
                 new javafx.beans.property.SimpleObjectProperty<>(getter.apply((T) cell.getValue())));
+        column.setPrefWidth(150);
         table.getColumns().add(column);
     }
 
     private void updateEditButton() {
         Object selected = table.getSelectionModel().getSelectedItem();
+        editButton.setDisable(!(selected instanceof Editable));
+    }
 
-        if (selected instanceof Editable) {
-            editButton.setDisable(false);
-        } else {
-            editButton.setDisable(true);
+    private void addEntity(Stage owner) {
+        switch (typeBox.getValue()) {
+            case PROFILE -> {
+                Profile result = profileDialog(owner, null);
+                if (result != null) {
+                    profiles.add(result);
+                    refreshTable();
+                }
+            }
+            case COMMUNITY -> {
+                Community result = communityDialog(owner, null);
+                if (result != null) {
+                    communities.add(result);
+                    refreshTable();
+                }
+            }
+            case DELETED_PROFILE -> showError("Удалённый профиль — read-only. Его нельзя добавить вручную.");
         }
     }
 
-    private void addEntity(Stage stage) {
-        if (typeBox.getValue() == Type.DELETED) {
-            alert("Удалённые профили нельзя добавлять.");
-            return;
-        }
-
-        if (typeBox.getValue() == Type.PROFILE) {
-            Profile profile = profileDialog(stage, null);
-
-            if (profile != null) {
-                profiles.add(profile);
-                refreshTable();
-            }
-        } else if (typeBox.getValue() == Type.COMMUNITY) {
-            Community community = communityDialog(stage, null);
-
-            if (community != null) {
-                communities.add(community);
-                refreshTable();
-            }
-        } else {
-            FriendShip friendship = friendshipDialog(stage, null);
-            if (friendship != null) {
-                friendships.add(friendship);
-                refreshTable();
-            }
-        }
-    }
-
-    private void editEntity(Stage stage) {
+    private void editEntity(Stage owner) {
         Object selected = table.getSelectionModel().getSelectedItem();
 
-        if (selected instanceof Community) {
-            Community community = (Community) selected;
-            Community result = communityDialog(stage, community);
-
-            if (result != null) {
-                refreshTable();
-            }
-        } else if (selected instanceof Profile) {
-            Profile profile = (Profile) selected;
-            Profile result = profileDialog(stage, profile);
-
-            if (result != null) {
-                refreshTable();
-            }
-        } else if (selected instanceof FriendShip) {
-            FriendShip friendship = (FriendShip) selected;
-            FriendShip result = friendshipDialog(stage, friendship);
-
-            if (result != null) {
-                refreshTable();
-            }
+        if (selected instanceof Community community) {
+            communityDialog(owner, community);
+        } else if (selected instanceof Profile profile) {
+            profileDialog(owner, profile);
+        } else {
+            showError("Выбранный объект нельзя редактировать.");
         }
+
+        refreshTable();
     }
 
-    private Profile profileDialog(Stage owner, Profile profile) {
+    private Profile profileDialog(Stage owner, Profile existing) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(owner);
-
-        if (profile == null) {
-            dialog.setTitle("Добавить профиль");
-        } else {
-            dialog.setTitle("Изменить профиль");
-        }
+        dialog.setTitle(existing == null ? "Добавить профиль" : "Изменить профиль");
 
         TextField id = new TextField();
         TextField name = new TextField();
         TextField city = new TextField();
         TextField birthYear = new TextField();
 
-        if (profile != null) {
-            id.setText(String.valueOf(profile.getId()));
-            name.setText(profile.getName());
-            city.setText(profile.getCity());
-            birthYear.setText(String.valueOf(profile.getBirthYear()));
+        if (existing != null) {
+            id.setText(String.valueOf(existing.getId()));
+            name.setText(existing.getName());
+            city.setText(existing.getCity());
+            birthYear.setText(String.valueOf(existing.getBirthYear()));
         }
 
-        GridPane grid = grid();
-
-        grid.add(new Label("ID:"), 0, 0);
-        grid.add(id, 1, 0);
-
-        grid.add(new Label("Имя:"), 0, 1);
-        grid.add(name, 1, 1);
-
-        grid.add(new Label("Город:"), 0, 2);
-        grid.add(city, 1, 2);
-
-        grid.add(new Label("Год рождения:"), 0, 3);
-        grid.add(birthYear, 1, 3);
+        GridPane grid = createGrid();
+        grid.addRow(0, new Label("ID:"), id);
+        grid.addRow(1, new Label("Имя:"), name);
+        grid.addRow(2, new Label("Город:"), city);
+        grid.addRow(3, new Label("Год рождения:"), birthYear);
 
         dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes()
-                .addAll(ButtonType.OK, ButtonType.CANCEL);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        ButtonType resultButton = dialog.showAndWait().orElse(ButtonType.CANCEL);
-
-        if (resultButton != ButtonType.OK) {
+        if (dialog.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return null;
         }
 
         try {
-            int profileId = Integer.parseInt(id.getText());
-            String profileName = name.getText();
-            String profileCity = city.getText();
-            int profileBirthYear = Integer.parseInt(birthYear.getText());
+            Profile target = existing == null
+                    ? new Profile(
+                            Integer.parseInt(id.getText().trim()),
+                            name.getText().trim(),
+                            city.getText().trim(),
+                            Integer.parseInt(birthYear.getText().trim()))
+                    : existing;
 
-            Profile result;
-
-            if (profile == null) {
-                result = new Profile(
-                        profileId,
-                        profileName,
-                        profileCity,
-                        profileBirthYear
-                );
-            } else {
-                result = profile;
-                result.setId(profileId);
-                result.setName(profileName);
-                result.setCity(profileCity);
-                result.setBirthYear(profileBirthYear);
+            if (existing != null) {
+                target.setId(Integer.parseInt(id.getText().trim()));
+                target.setName(name.getText().trim());
+                target.setCity(city.getText().trim());
+                target.setBirthYear(Integer.parseInt(birthYear.getText().trim()));
             }
 
-            List<String> errors = result.validate();
-
+            List<String> errors = target.validate();
             if (!errors.isEmpty()) {
-                alert(String.join("\n", errors));
+                showError(String.join("\n", errors));
                 return null;
             }
 
-            return result;
-
+            return target;
         } catch (NumberFormatException e) {
-            alert("ID и год рождения должны быть числами.");
+            showError("ID и год рождения должны быть целыми числами.");
             return null;
         }
     }
 
-    private Community communityDialog(Stage owner, Community community) {
+    private Community communityDialog(Stage owner, Community existing) {
         Dialog<ButtonType> dialog = new Dialog<>();
         dialog.initOwner(owner);
-
-        if (community == null) {
-            dialog.setTitle("Добавить сообщество");
-        } else {
-            dialog.setTitle("Изменить сообщество");
-        }
+        dialog.setTitle(existing == null ? "Добавить сообщество" : "Изменить сообщество");
 
         TextField id = new TextField();
         TextField name = new TextField();
         TextField city = new TextField();
-        TextField birthYear = new TextField();
-        TextField adminId = new TextField();
+        TextField year = new TextField();
+        TextField administratorId = new TextField();
 
-        if (community != null) {
-            id.setText(String.valueOf(community.getId()));
-            name.setText(community.getName());
-            city.setText(community.getCity());
-            birthYear.setText(String.valueOf(community.getBirthYear()));
-            adminId.setText(String.valueOf(community.getAdministratorId()));
+        if (existing != null) {
+            id.setText(String.valueOf(existing.getId()));
+            name.setText(existing.getName());
+            city.setText(existing.getCity());
+            year.setText(String.valueOf(existing.getBirthYear()));
+            administratorId.setText(String.valueOf(existing.getAdministratorId()));
         }
 
-        id.setDisable(community != null);
-
-        GridPane grid = grid();
-
-        grid.add(new Label("ID:"), 0, 0);
-        grid.add(id, 1, 0);
-
-        grid.add(new Label("Название:"), 0, 1);
-        grid.add(name, 1, 1);
-
-        grid.add(new Label("Город:"), 0, 2);
-        grid.add(city, 1, 2);
-
-        grid.add(new Label("Год создания:"), 0, 3);
-        grid.add(birthYear, 1, 3);
-
-        grid.add(new Label("Администратор:"), 0, 4);
-        grid.add(adminId, 1, 4);
+        GridPane grid = createGrid();
+        grid.addRow(0, new Label("ID:"), id);
+        grid.addRow(1, new Label("Название:"), name);
+        grid.addRow(2, new Label("Город:"), city);
+        grid.addRow(3, new Label("Год создания:"), year);
+        grid.addRow(4, new Label("ID администратора:"), administratorId);
 
         dialog.getDialogPane().setContent(grid);
         dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-        ButtonType resultButton = dialog.showAndWait().orElse(ButtonType.CANCEL);
-
-        if (resultButton != ButtonType.OK) {
+        if (dialog.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
             return null;
         }
 
         try {
-            int communityId = Integer.parseInt(id.getText());
-            String communityName = name.getText();
-            String communityCity = city.getText();
-            int communityBirthYear = Integer.parseInt(birthYear.getText());
-            int administratorId = Integer.parseInt(adminId.getText());
+            Community target = existing == null
+                    ? new Community(
+                            Integer.parseInt(id.getText().trim()),
+                            name.getText().trim(),
+                            city.getText().trim(),
+                            Integer.parseInt(year.getText().trim()),
+                            Integer.parseInt(administratorId.getText().trim()))
+                    : existing;
 
-            Community result;
-
-            if (community == null) {
-                result = new Community(
-                        communityId,
-                        communityName,
-                        communityCity,
-                        communityBirthYear,
-                        administratorId
-                );
-            } else {
-                result = community;
-                result.setName(communityName);
-                result.setCity(communityCity);
-                result.setBirthYear(communityBirthYear);
-                result.setAdministratorId(administratorId);
+            if (existing != null) {
+                target.setId(Integer.parseInt(id.getText().trim()));
+                target.setName(name.getText().trim());
+                target.setCity(city.getText().trim());
+                target.setBirthYear(Integer.parseInt(year.getText().trim()));
+                target.setAdministratorId(Integer.parseInt(administratorId.getText().trim()));
             }
 
-            List<String> errors = result.validate();
-
+            List<String> errors = target.validate();
             if (!errors.isEmpty()) {
-                alert(String.join("\n", errors));
+                showError(String.join("\n", errors));
                 return null;
             }
 
-            return result;
-
+            return target;
         } catch (NumberFormatException e) {
-            alert("Числовые поля должны содержать числа.");
+            showError("Числовые поля должны быть целыми числами.");
             return null;
         }
     }
 
-    private FriendShip friendshipDialog(Stage owner, FriendShip friendship) {
-        Dialog<ButtonType> dialog = new Dialog<>();
-        dialog.initOwner(owner);
-        dialog.setTitle(friendship == null ? "Добавить дружбу" : "Изменить дружбу");
-
-        TextField profile1 = new TextField();
-        TextField profile2 = new TextField();
-        TextField strength = new TextField();
-
-        if (friendship != null) {
-            profile1.setText(String.valueOf(friendship.getProfile1()));
-            profile2.setText(String.valueOf(friendship.getProfile2()));
-            strength.setText(String.valueOf(friendship.getStrength()));
-            profile1.setDisable(true);
-            profile2.setDisable(true);
-        }
-
-        GridPane grid = grid();
-        grid.add(new Label("Профиль 1:"), 0, 0);
-        grid.add(profile1, 1, 0);
-        grid.add(new Label("Профиль 2:"), 0, 1);
-        grid.add(profile2, 1, 1);
-        grid.add(new Label("Сила связи:"), 0, 2);
-        grid.add(strength, 1, 2);
-
-        dialog.getDialogPane().setContent(grid);
-        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
-
-        ButtonType resultButton = dialog.showAndWait().orElse(ButtonType.CANCEL);
-        if (resultButton != ButtonType.OK) {
-            return null;
-        }
-
-        try {
-            int id1 = Integer.parseInt(profile1.getText());
-            int id2 = Integer.parseInt(profile2.getText());
-            int value = Integer.parseInt(strength.getText());
-
-            FriendShip result;
-            if (friendship == null) {
-                result = new FriendShip(id1, id2, value);
-            } else {
-                result = friendship;
-                result.setStrength(value);
-            }
-
-            List<String> errors = result.validate();
-            if (!errors.isEmpty()) {
-                alert(String.join("\n", errors));
-                return null;
-            }
-
-            return result;
-        } catch (NumberFormatException e) {
-            alert("ID профилей и сила связи должны быть числами.");
-            return null;
-        }
+    private GridPane createGrid() {
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setStyle("-fx-padding: 10;");
+        return grid;
     }
 
-    private void loadCsv(Stage stage) {
+    private void loadCsv(Stage owner) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Загрузить CSV");
-
-        File file = chooser.showOpenDialog(stage);
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files", "*.csv"));
+        File file = chooser.showOpenDialog(owner);
         if (file == null) {
             return;
         }
 
         try {
             Path path = file.toPath();
-            StringBuilder errorsText = new StringBuilder();
 
             switch (typeBox.getValue()) {
                 case PROFILE -> {
-                    LoadCsvResult<Profile> result = new ProfileCsvLoader().load(path);
-                    profiles.setAll(result.getItems());
-                    appendErrors(errorsText, result);
+                    CsvParseResult<Profile> result = ProfileCsv.load(path);
+                    profiles.clear();
+                    profiles.addAll(result.items());
+                    showLoadResult(result.items().size(), result.errors());
+                }
+                case DELETED_PROFILE -> {
+                    CsvParseResult<DeletedProfile> result = DeletedProfileCsv.load(path);
+                    deletedProfiles.clear();
+                    deletedProfiles.addAll(result.items());
+                    showLoadResult(result.items().size(), result.errors());
                 }
                 case COMMUNITY -> {
-                    LoadCsvResult<Community> result = new CommunityCsvLoader().load(path);
-                    communities.setAll(result.getItems());
-                    appendErrors(errorsText, result);
-                }
-                case DELETED -> {
-                    LoadCsvResult<DelProfile> result = new DelProfileCsvLoader().load(path);
-                    deleted.setAll(result.getItems());
-                    appendErrors(errorsText, result);
-                }
-                case FRIENDSHIP -> {
-                    LoadCsvResult<FriendShip> result = new FriendShipCsvLoader().load(path);
-                    friendships.setAll(result.getItems());
-                    appendErrors(errorsText, result);
+                    CsvParseResult<Community> result = CommunityCsv.load(path);
+                    communities.clear();
+                    communities.addAll(result.items());
+                    showLoadResult(result.items().size(), result.errors());
                 }
             }
 
             refreshTable();
-
-            if (errorsText.length() > 0) {
-                alert("Некоторые строки пропущены:\n" + errorsText);
-            }
-        } catch (LoadCsvException e) {
-            alert(formatError(e));
-        } catch (Exception e) {
-            alert("Ошибка загрузки: " + e.getMessage());
+        } catch (IOException e) {
+            showError("Не удалось прочитать файл: " + e.getMessage());
         }
     }
 
-    private void appendErrors(StringBuilder builder, LoadCsvResult<?> result) {
-        result.getErrors().forEach(error ->
-                builder.append(formatError(error)).append("\n"));
-    }
-
-    private String formatError(LoadCsvException e) {
-        if (e.getLineNumber() > 0) {
-            return "Строка " + e.getLineNumber() + " [" + e.getCode() + "]: " + e.getMessage();
-        }
-        return "[" + e.getCode() + "]: " + e.getMessage();
-    }
-
-    private void saveCsv(Stage stage) {
+    private void saveCsv(Stage owner) {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Сохранить CSV");
-        chooser.getExtensionFilters().add(
-                new FileChooser.ExtensionFilter("CSV файлы", "*.csv"));
-
-        File file = chooser.showSaveDialog(stage);
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("CSV files", "*.csv"));
+        File file = chooser.showSaveDialog(owner);
         if (file == null) {
             return;
         }
 
         try {
             Path path = file.toPath();
+
             switch (typeBox.getValue()) {
-                case PROFILE -> new ProfileCsvSaver().save(profiles, path);
-                case COMMUNITY -> new CommunityCsvSaver().save(communities, path);
-                case DELETED -> new DelProfileCsvSaver().save(deleted, path);
-                case FRIENDSHIP -> new FriendShipCsvSaver().save(friendships, path);
+                case PROFILE -> ProfileCsv.save(profiles, path);
+                case DELETED_PROFILE -> DeletedProfileCsv.save(deletedProfiles, path);
+                case COMMUNITY -> CommunityCsv.save(communities, path);
             }
-            alert("Файл сохранён.");
-        } catch (Exception e) {
-            alert("Ошибка сохранения: " + e.getMessage());
+
+            showInfo("Данные сохранены.");
+        } catch (IOException e) {
+            showError("Не удалось сохранить файл: " + e.getMessage());
         }
     }
 
-    private GridPane grid() {
-        GridPane grid = new GridPane();
-
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(10));
-
-        return grid;
+    private void showLoadResult(int loadedCount, List<String> errors) {
+        if (errors.isEmpty()) {
+            showInfo("CSV загружен. Битых строк не обнаружено.");
+        } else {
+            showInfo("CSV загружен. Корректных записей: " +
+                    loadedCount +
+                    ". Пропущено битых строк: " + errors.size() +
+                    "\n\n" + String.join("\n", errors));
+        }
     }
 
-    private void alert(String message) {
+    private void showInfo(String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
-
-        alert.setTitle("Социальная сеть");
+        alert.setTitle("Информация");
         alert.setHeaderText(null);
         alert.setContentText(message);
+        alert.showAndWait();
+    }
 
+    private void showError(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Ошибка");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }
