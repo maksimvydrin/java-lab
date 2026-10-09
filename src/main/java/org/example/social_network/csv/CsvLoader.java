@@ -33,7 +33,7 @@ public final class CsvLoader {
             switch (header) {
                 case "id;name;city;birthYear" -> fields = 4;
                 case "id;name;city;birthYear;adminId" -> fields = 5;
-                case "id;name;city;birthYear;delReason;dayDel" -> fields = 6;
+                case "id;name;city;birthYear;dayDel;delReason" -> fields = 6;
                 case "profile1;profile2;strength" -> fields = 3;
                 default -> throw new LoadCsvException(ErrorCsv.INVALID_DATA, 1, "Неизвестный заголовок: " + header);
             }
@@ -95,13 +95,14 @@ public final class CsvLoader {
                 }
                 yield community;
             }
-            case "id;name;city;birthYear;delReason;dayDel" ->{
+            case "id;name;city;birthYear;dayDel;delReason" ->{
                 int id = parseInt(parts[0],lineNumber,"ID");
                 String name = parts[1];
                 String city = parts[2];
                 int birthYear = parseInt(parts[3],lineNumber,"Год рождения");
-                String delReason = parts[4];
-                int dayDel = parseInt(parts[5],lineNumber,"Дата удаления");
+                int dayDel = parseInt(parts[4],lineNumber,"Дата удаления");
+                String delReason = parts[5];
+
 
                 if(name.isEmpty() || city.isEmpty() || delReason.isEmpty()||birthYear<=0||dayDel<=0){
                     throw new LoadCsvException(ErrorCsv.INVALID_DATA, lineNumber,"Имя,город,причина не могут быть пустыми,а год и дата должны быть > 0");
