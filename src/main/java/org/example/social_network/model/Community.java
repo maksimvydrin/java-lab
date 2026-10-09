@@ -11,11 +11,11 @@ public class Community extends Profile implements Editable {
         this.adminId = administratorId;
     }
 
-    public int getAdministratorId() {
+    public int getAdminId() {
         return adminId;
     }
 
-    public void setAdministratorId(int administratorId) {
+    public void setAdminId(int administratorId) {
         this.adminId = administratorId;
     }
 

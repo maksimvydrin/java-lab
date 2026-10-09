@@ -32,6 +32,9 @@ public class DelProfile extends Profile {
         if(delReason.isEmpty()){
             errors.add("Причина не может быть пустой");
             }
+        if (dayDel <= 0) {
+            errors.add("Дата удаления должна быть больше 0");
+        }
         return errors;
     }
 
