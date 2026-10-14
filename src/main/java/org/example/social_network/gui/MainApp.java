@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import org.example.social_network.controller.CsvController;
-import org.example.social_network.controller.EntityController;
+import org.example.social_network.controller.Controller;
 import org.example.social_network.model.*;
 
 public class MainApp extends javafx.application.Application {
@@ -22,7 +22,6 @@ public class MainApp extends javafx.application.Application {
         FRIENDSHIP("Дружба");
 
         private final String title;
-
         Type(String title) {
             this.title = title;
         }
@@ -42,7 +41,7 @@ public class MainApp extends javafx.application.Application {
     private final ComboBox<Type> typeBox = new ComboBox<>();
     private final Button editButton = new Button("Изменить");
 
-    private final EntityController entityController = new EntityController();
+    private final Controller entityController = new Controller();
     private final CsvController csvController = new CsvController();
 
     @Override
@@ -92,11 +91,9 @@ public class MainApp extends javafx.application.Application {
 
     private void editEntity(Stage stage) {
         Object selected = table.getSelectionModel().getSelectedItem();
-
         if (!(selected instanceof Editable)) {
             return;
         }
-
         entityController.edit(stage, selected);
         refreshTable();
     }

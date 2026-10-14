@@ -7,7 +7,7 @@ import org.example.social_network.csv.CsvLoader;
 import org.example.social_network.csv.CsvSaver;
 import org.example.social_network.exception.LoadCsvException;
 import org.example.social_network.exception.LoadCsvResult;
-import org.example.social_network.gui.GenericEntityDialog;
+import org.example.social_network.gui.GenericDialog;
 import org.example.social_network.gui.MainApp;
 import org.example.social_network.model.*;
 
@@ -15,7 +15,6 @@ import java.io.File;
 import java.nio.file.Path;
 
 public final class CsvController {
-
     public void load(Stage stage, MainApp.Type type,
                      ObservableList<Profile> profiles,
                      ObservableList<Community> communities,
@@ -27,9 +26,9 @@ public final class CsvController {
         try {
             loadInto(file.toPath(), type, profiles, communities, deleted, friendships);
         } catch (LoadCsvException e) {
-            GenericEntityDialog.showAlert(formatError(e));
+            GenericDialog.showAlert(formatError(e));
         } catch (Exception e) {
-            GenericEntityDialog.showAlert("Ошибка загрузки: " + e.getMessage());
+            GenericDialog.showAlert("Ошибка загрузки: " + e.getMessage());
         }
     }
 
@@ -43,9 +42,9 @@ public final class CsvController {
 
         try {
             saveFrom(file.toPath(), type, profiles, communities, deleted, friendships);
-            GenericEntityDialog.showAlert("Файл сохранён.");
+            GenericDialog.showAlert("Файл сохранён.");
         } catch (Exception e) {
-            GenericEntityDialog.showAlert("Ошибка сохранения: " + e.getMessage());
+            GenericDialog.showAlert("Ошибка сохранения: " + e.getMessage());
         }
     }
 
@@ -65,7 +64,7 @@ public final class CsvController {
         }
 
         if (!errors.isEmpty()) {
-            GenericEntityDialog.showAlert("Некоторые строки пропущены:\n" + errors);
+            GenericDialog.showAlert("Некоторые строки пропущены:\n" + errors);
         }
     }
 
@@ -99,9 +98,7 @@ public final class CsvController {
     }
 
     private String formatError(LoadCsvException error) {
-        String line = error.getLineNumber() > 0
-                ? "Строка " + error.getLineNumber() + " "
-                : "";
+        String line = error.getLineNumber() > 0 ? "Строка " + error.getLineNumber() + " " : "";
         return line + "[" + error.getCode() + "]: " + error.getMessage();
     }
 }

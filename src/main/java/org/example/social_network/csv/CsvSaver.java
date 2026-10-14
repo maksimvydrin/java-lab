@@ -1,7 +1,5 @@
 package org.example.social_network.csv;
 
-import org.example.social_network.exception.ErrorCsv;
-import org.example.social_network.exception.LoadCsvException;
 import org.example.social_network.model.Community;
 import org.example.social_network.model.DelProfile;
 import org.example.social_network.model.FriendShip;
@@ -15,7 +13,6 @@ import java.nio.file.Path;
 import java.util.List;
 
 public final class CsvSaver {
-
     public <T> void save(List<T> items, Path file){
         if (items.isEmpty()){
             throw new IllegalArgumentException("Список аргументов для сохранения пуст");

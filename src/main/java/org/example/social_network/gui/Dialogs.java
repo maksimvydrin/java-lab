@@ -5,8 +5,8 @@ import org.example.social_network.model.*;
 
 import java.util.List;
 
-public final class EntityDialogs {
-    private EntityDialogs() {}
+public final class Dialogs {
+    private Dialogs() {}
     public static Profile profileDialog(Stage owner, Profile profile) {
         List<FieldSpec> fields = List.of(
                 new FieldSpec("ID:", profile != null ? String.valueOf(profile.getId()) : ""),
@@ -14,7 +14,7 @@ public final class EntityDialogs {
                 new FieldSpec("Город:", profile != null ? profile.getCity() : ""),
                 new FieldSpec("Год рождения:", profile != null ? String.valueOf(profile.getBirthYear()) : "")
         );
-        return GenericEntityDialog.show(
+        return GenericDialog.show(
                 owner,
                 profile == null ? "Добавить профиль" : "Изменить профиль",
                 fields,
@@ -46,7 +46,7 @@ public final class EntityDialogs {
                 new FieldSpec("Администратор:", community != null ? String.valueOf(community.getAdminId()) : "")
         );
 
-        return GenericEntityDialog.show(owner,
+        return GenericDialog.show(owner,
                 community == null ? "Добавить сообщество" : "Изменить сообщество",
                 fields,
                 values -> {
@@ -76,7 +76,7 @@ public final class EntityDialogs {
                 new FieldSpec("Сила связи:", friendship != null ? String.valueOf(friendship.getStrength()) : "")
         );
 
-        return GenericEntityDialog.show(
+        return GenericDialog.show(
                 owner,
                 friendship == null ? "Добавить дружбу" : "Изменить дружбу",
                 fields,

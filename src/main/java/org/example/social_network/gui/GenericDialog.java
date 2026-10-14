@@ -10,9 +10,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
-public final class GenericEntityDialog {
+public final class GenericDialog {
 
-    private GenericEntityDialog() {}
+    private GenericDialog() {}
     public static <T extends Editable> T show(
             Stage owner,
             String title,

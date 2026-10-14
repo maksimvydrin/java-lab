@@ -2,13 +2,12 @@ package org.example.social_network.controller;
 
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
-import org.example.social_network.gui.EntityDialogs;
-import org.example.social_network.gui.GenericEntityDialog;
+import org.example.social_network.gui.Dialogs;
+import org.example.social_network.gui.GenericDialog;
 import org.example.social_network.gui.MainApp;
 import org.example.social_network.model.*;
 
-public final class EntityController {
-
+public final class Controller {
     public void add(Stage stage, MainApp.Type type,
                     ObservableList<Profile> profiles,
                     ObservableList<Community> communities,
@@ -17,32 +16,32 @@ public final class EntityController {
             case PROFILE -> addProfile(stage, profiles);
             case COMMUNITY -> addCommunity(stage, communities);
             case FRIENDSHIP -> addFriendship(stage, friendships);
-            case DELETED -> GenericEntityDialog.showAlert("Удалённые профили нельзя добавлять.");
+            case DELETED -> GenericDialog.showAlert("Удалённые профили нельзя добавлять.");
         }
     }
 
     public void edit(Stage stage, Object selected) {
-        if (selected instanceof Profile profile) {
-            EntityDialogs.profileDialog(stage, profile);
-        } else if (selected instanceof Community community) {
-            EntityDialogs.communityDialog(stage, community);
+        if (selected instanceof Community community) {
+            Dialogs.communityDialog(stage, community);
+        } else if (selected instanceof Profile profile) {
+            Dialogs.profileDialog(stage, profile);
         } else if (selected instanceof FriendShip friendship) {
-            EntityDialogs.friendshipDialog(stage, friendship);
+            Dialogs.friendshipDialog(stage, friendship);
         }
     }
 
     private void addProfile(Stage stage, ObservableList<Profile> profiles) {
-        Profile profile = EntityDialogs.profileDialog(stage, null);
+        Profile profile = Dialogs.profileDialog(stage, null);
         if (profile != null) profiles.add(profile);
     }
 
     private void addCommunity(Stage stage, ObservableList<Community> communities) {
-        Community community = EntityDialogs.communityDialog(stage, null);
+        Community community = Dialogs.communityDialog(stage, null);
         if (community != null) communities.add(community);
     }
 
     private void addFriendship(Stage stage, ObservableList<FriendShip> friendships) {
-        FriendShip friendship = EntityDialogs.friendshipDialog(stage, null);
+        FriendShip friendship = Dialogs.friendshipDialog(stage, null);
         if (friendship != null) friendships.add(friendship);
     }
 }

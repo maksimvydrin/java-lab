@@ -22,7 +22,7 @@ public final class CsvLoader {
         List<LoadCsvException> errors = new ArrayList<>();
 
         try (var reader = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
-            String header = reader.readLine();                      // строка-заголовок
+            String header = reader.readLine();
             if (header == null) {
                 throw new LoadCsvException(ErrorCsv.INVALID_DATA, 1, "Заголовок отсутствует");
             }
@@ -48,7 +48,7 @@ public final class CsvLoader {
                 try {
                     String[] parts = line.split(";", -1);
                     if (parts.length != fields) {
-                        throw new LoadCsvException(ErrorCsv.WRONG_FIELD_COUNT, lineNumber, "Ожидалось" + fields + " полей,получено " + parts.length);
+                        throw new LoadCsvException(ErrorCsv.WRONG_FIELD_COUNT, lineNumber, "Ожидалось " + fields + " полей,получено  " + parts.length);
                     }
                     Object item = parseLine(header,parts,lineNumber);
                     if(item!=null){
