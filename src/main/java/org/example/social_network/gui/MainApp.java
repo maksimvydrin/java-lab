@@ -1,3 +1,4 @@
+
 package org.example.social_network.gui;
 
 import javafx.collections.FXCollections;
@@ -11,6 +12,7 @@ import javafx.stage.Stage;
 
 import org.example.social_network.controller.CsvController;
 import org.example.social_network.controller.Controller;
+import org.example.social_network.graph.SocialGraph;
 import org.example.social_network.model.*;
 
 public class MainApp extends javafx.application.Application {
@@ -22,6 +24,7 @@ public class MainApp extends javafx.application.Application {
         FRIENDSHIP("Дружба");
 
         private final String title;
+
         Type(String title) {
             this.title = title;
         }
@@ -32,22 +35,30 @@ public class MainApp extends javafx.application.Application {
         }
     }
 
-    private final ObservableList<Profile> profiles = FXCollections.observableArrayList();
-    private final ObservableList<Community> communities = FXCollections.observableArrayList();
-    private final ObservableList<DelProfile> deleted = FXCollections.observableArrayList();
-    private final ObservableList<FriendShip> friendships = FXCollections.observableArrayList();
+    private final ObservableList<Profile> profiles =
+            FXCollections.observableArrayList();
+
+    private final ObservableList<Community> communities =
+            FXCollections.observableArrayList();
+
+    private final ObservableList<DelProfile> deleted =
+            FXCollections.observableArrayList();
+
+    private final ObservableList<FriendShip> friendships =
+            FXCollections.observableArrayList();
 
     private final TableView<Object> table = new TableView<>();
-    private GraphCanvas graphCanvas;
     private final ComboBox<Type> typeBox = new ComboBox<>();
     private final Button editButton = new Button("Изменить");
 
     private final Controller entityController = new Controller();
     private final CsvController csvController = new CsvController();
+    private final SocialGraph socialGraph = new SocialGraph();
+
+    private GraphCanvas graphCanvas;
 
     @Override
     public void start(Stage stage) {
-
         configureTypeBox();
 
         Button addButton = new Button("Добавить");
@@ -56,8 +67,14 @@ public class MainApp extends javafx.application.Application {
 
         configureActions(stage, addButton, loadButton, saveButton);
         configureTableSelection();
+
         HBox controls = new HBox(
-                10, typeBox, addButton, editButton, loadButton, saveButton
+                10,
+                typeBox,
+                addButton,
+                editButton,
+                loadButton,
+                saveButton
         );
 
         graphCanvas = new GraphCanvas(profiles, friendships);
@@ -79,49 +96,130 @@ public class MainApp extends javafx.application.Application {
     private void configureTypeBox() {
         typeBox.getItems().addAll(Type.values());
         typeBox.setValue(Type.PROFILE);
-        typeBox.setOnAction(_ -> refreshTable());
+        typeBox.setOnAction(event -> refreshTable());
     }
 
-    private void configureActions(Stage stage, Button addButton, Button loadButton, Button saveButton) {
-        addButton.setOnAction(_ -> addEntity(stage));
-        editButton.setOnAction(_ -> editEntity(stage));
-        loadButton.setOnAction(_ -> loadCsv(stage));
-        saveButton.setOnAction(_ -> saveCsv(stage));
+    private void configureActions(
+            Stage stage,
+            Button addButton,
+            Button loadButton,
+            Button saveButton
+    ) {
+        addButton.setOnAction(
+                event -> addEntity(stage)
+        );
+
+        editButton.setOnAction(
+                event -> editEntity(stage)
+        );
+
+        loadButton.setOnAction(
+                event -> loadCsv(stage)
+        );
+
+        saveButton.setOnAction(
+                event -> saveCsv(stage)
+        );
     }
 
     private void configureTableSelection() {
-        table.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> updateEditButton());
+        table.getSelectionModel()
+                .selectedItemProperty()
+                .addListener((observable, oldValue, newValue) ->
+                        updateEditButton()
+                );
     }
 
     private void addEntity(Stage stage) {
-        entityController.add(stage, typeBox.getValue(), profiles, communities, friendships);
+        entityController.add(
+                stage,
+                typeBox.getValue(),
+                profiles,
+                communities,
+                friendships
+        );
+
         refreshTable();
     }
 
     private void editEntity(Stage stage) {
         Object selected = table.getSelectionModel().getSelectedItem();
+
         if (!(selected instanceof Editable)) {
             return;
         }
+
         entityController.edit(stage, selected);
         refreshTable();
     }
 
     private void loadCsv(Stage stage) {
-        csvController.load(stage, typeBox.getValue(), profiles, communities, deleted, friendships);
+        csvController.load(
+                stage,
+                typeBox.getValue(),
+                profiles,
+                communities,
+                deleted,
+                friendships
+        );
+
         refreshTable();
     }
 
     private void saveCsv(Stage stage) {
-        csvController.save(stage, typeBox.getValue(), profiles, communities, deleted, friendships);
+        csvController.save(
+                stage,
+                typeBox.getValue(),
+                profiles,
+                communities,
+                deleted,
+                friendships
+        );
     }
 
-    private void refreshTable() { TableManager.updateColumnsAndData( table, typeBox.getValue(), profiles, communities, deleted, friendships );
+    private void rebuildGraph() {
+        socialGraph.clear();
+
+        for (Profile profile : profiles) {
+            if (!socialGraph.containsVertex(profile.getId())) {
+                socialGraph.addVertex(profile);
+            }
+        }
+
+        for (FriendShip friendship : friendships) {
+            if (friendship.validate().isEmpty()
+                    && socialGraph.containsVertex(friendship.getProfile1())
+                    && socialGraph.containsVertex(friendship.getProfile2())) {
+
+                socialGraph.addEdge(
+                        friendship.getProfile1(),
+                        friendship.getProfile2(),
+                        friendship.getStrength()
+                );
+            }
+        }
+    }
+
+    private void refreshTable() {
+        TableManager.updateColumnsAndData(
+                table,
+                typeBox.getValue(),
+                profiles,
+                communities,
+                deleted,
+                friendships
+        );
+
+        rebuildGraph();
         updateEditButton();
 
         if (graphCanvas != null) {
             graphCanvas.refresh();
         }
+    }
+
+    public SocialGraph getSocialGraph() {
+        return socialGraph;
     }
 
     private void updateEditButton() {

@@ -1,15 +1,24 @@
+
 package org.example.social_network.model;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class DelProfile extends Profile {
+
     private String delReason;
     private int dayDel;
 
-    public DelProfile(final int id, final String name, final String city, final int birthYear, final int dayDel, final String Reason) {
+    public DelProfile(
+            int id,
+            String name,
+            String city,
+            int birthYear,
+            int dayDel,
+            String reason
+    ) {
         super(id, name, city, birthYear);
-        this.delReason = Reason;
+        this.delReason = reason;
         this.dayDel = dayDel;
     }
 
@@ -26,20 +35,24 @@ public class DelProfile extends Profile {
     }
 
     @Override
-    public List<String> validate(){
+    public List<String> validate() {
         List<String> errors = new ArrayList<>(super.validate());
 
-        if(delReason.isEmpty()){
-            errors.add("Причина не может быть пустой");
-            }
+        if (delReason == null || delReason.isBlank()) {
+            errors.add("Причина удаления не может быть пустой");
+        }
+
         if (dayDel <= 0) {
             errors.add("Дата удаления должна быть больше 0");
         }
+
         return errors;
     }
 
     @Override
     public String toString() {
-        return(getId()+":"+getName()+"("+getCity()+","+getBirthYear()+")"+"причина: "+delReason);
+        return getId() + ":" + getName()
+                + "(" + getCity() + "," + getBirthYear() + ")"
+                + " причина: " + delReason;
     }
 }

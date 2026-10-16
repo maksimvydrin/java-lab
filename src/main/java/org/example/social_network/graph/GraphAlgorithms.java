@@ -1,10 +1,21 @@
+
 package org.example.social_network.graph;
 
 import java.util.*;
 
 public class GraphAlgorithms {
 
-    public List<Integer> bfs(SocialGraph graph, int start, int target) {
+    public List<Integer> bfs(
+            SocialGraph graph,
+            int start,
+            int target
+    ) {
+        if (graph == null
+                || !graph.containsVertex(start)
+                || !graph.containsVertex(target)) {
+            return new ArrayList<>();
+        }
+
         Queue<Integer> queue = new LinkedList<>();
         Set<Integer> visited = new HashSet<>();
         Map<Integer, Integer> previous = new HashMap<>();
@@ -12,73 +23,68 @@ public class GraphAlgorithms {
         queue.add(start);
         visited.add(start);
 
-        boolean found = false;
-
         while (!queue.isEmpty()) {
             int current = queue.poll();
 
             if (current == target) {
-                found = true;
-                break;
+                return restorePath(previous, start, target);
             }
 
             GraphNode neighbor = graph.getNeighbors(current);
+
             while (neighbor != null) {
                 int neighborId = neighbor.getVertexId();
-                if (!visited.contains(neighborId)) {
-                    visited.add(neighborId);
+
+                if (visited.add(neighborId)) {
                     previous.put(neighborId, current);
                     queue.add(neighborId);
                 }
+
                 neighbor = neighbor.getNext();
             }
         }
 
-        if (!found) {
+        return new ArrayList<>();
+    }
+
+    public List<Integer> dijkstra(
+            SocialGraph graph,
+            int start,
+            int target
+    ) {
+        if (graph == null
+                || !graph.containsVertex(start)
+                || !graph.containsVertex(target)) {
             return new ArrayList<>();
         }
 
-        List<Integer> path = new ArrayList<>();
-        int curr = target;
-        while (curr != start) {
-            path.add(curr);
-            curr = previous.get(curr);
-        }
-        path.add(start);
-        Collections.reverse(path);
+        int[] keys = graph.getAllKeys();
 
-        return path;
-    }
-
-    public List<Integer> dijkstra(SocialGraph graph, int start, int target) {
-        Map<Integer, Integer> distances = new HashMap<>();
+        Map<Integer, Long> distances = new HashMap<>();
         Map<Integer, Integer> previous = new HashMap<>();
         Set<Integer> visited = new HashSet<>();
 
-        int[] keys = graph.getAllKeys();
-        for (int i = 0; i < keys.length; i++) {
-            distances.put(keys[i], Integer.MAX_VALUE);
+        for (int key : keys) {
+            distances.put(key, Long.MAX_VALUE);
         }
 
-        if (!distances.containsKey(start) || !distances.containsKey(target)) {
-            return new ArrayList<>();
-        }
-
-        distances.put(start, 0);
+        distances.put(start, 0L);
 
         while (visited.size() < keys.length) {
             int closestVertex = -1;
-            int minDistance = Integer.MAX_VALUE;
+            long minDistance = Long.MAX_VALUE;
 
-            for (int i = 0; i < keys.length; i++) {
-                int v = keys[i];
-                if (!visited.contains(v) && distances.get(v) < minDistance) {
-                    minDistance = distances.get(v);
-                    closestVertex = v;
+            for (int key : keys) {
+                long distance = distances.get(key);
+
+                if (!visited.contains(key)
+                        && distance < minDistance) {
+                    minDistance = distance;
+                    closestVertex = key;
                 }
             }
 
-            if (closestVertex == -1 || minDistance == Integer.MAX_VALUE) {
+            if (closestVertex == -1) {
                 break;
             }
 
@@ -89,30 +95,58 @@ public class GraphAlgorithms {
             }
 
             GraphNode neighbor = graph.getNeighbors(closestVertex);
+
             while (neighbor != null) {
                 int nextVertex = neighbor.getVertexId();
                 int weight = neighbor.getWeight();
 
+                if (weight < 0) {
+                    throw new IllegalStateException(
+                            "Дейкстра не поддерживает отрицательные веса"
+                    );
+                }
+
                 if (!visited.contains(nextVertex)) {
-                    int newDist = distances.get(closestVertex) + weight;
-                    if (newDist < distances.get(nextVertex)) {
-                        distances.put(nextVertex, newDist);
+                    long newDistance =
+                            distances.get(closestVertex) + weight;
+
+                    if (newDistance < distances.get(nextVertex)) {
+                        distances.put(nextVertex, newDistance);
                         previous.put(nextVertex, closestVertex);
                     }
                 }
+
                 neighbor = neighbor.getNext();
             }
         }
 
+        if (distances.get(target) == Long.MAX_VALUE) {
+            return new ArrayList<>();
+        }
+
+        return restorePath(previous, start, target);
+    }
+
+    private List<Integer> restorePath(
+            Map<Integer, Integer> previous,
+            int start,
+            int target
+    ) {
         List<Integer> path = new ArrayList<>();
-        int curr = target;
-        while (curr != start) {
-            if (!previous.containsKey(curr)) {
+        int current = target;
+
+        while (current != start) {
+            path.add(current);
+
+            Integer predecessor = previous.get(current);
+
+            if (predecessor == null) {
                 return new ArrayList<>();
             }
-            path.add(curr);
-            curr = previous.get(curr);
+
+            current = predecessor;
         }
+
         path.add(start);
         Collections.reverse(path);
 
