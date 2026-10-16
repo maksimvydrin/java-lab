@@ -5,11 +5,8 @@ import java.util.*;
 
 public class GraphAlgorithms {
 
-    public List<Integer> bfs(
-            SocialGraph graph,
-            int start,
-            int target
-    ) {
+    public List<Integer> bfs(SocialGraph graph, int start, int target)
+    {
         if (graph == null || !graph.containsVertex(start) || !graph.containsVertex(target)) {
             return new ArrayList<>();
         }
@@ -37,11 +34,9 @@ public class GraphAlgorithms {
                     previous.put(neighborId, current);
                     queue.add(neighborId);
                 }
-
                 neighbor = neighbor.getNext();
             }
         }
-
         return new ArrayList<>();
     }
 
@@ -50,27 +45,26 @@ public class GraphAlgorithms {
             int start,
             int target
     ) {
-        if (graph == null
-                || !graph.containsVertex(start)
-                || !graph.containsVertex(target)) {
+        if (graph == null || !graph.containsVertex(start) || !graph.containsVertex(target))
+        {
             return new ArrayList<>();
         }
 
         int[] keys = graph.getAllKeys();
 
-        Map<Integer, Long> distances = new HashMap<>();
+        Map<Integer, Integer> distances = new HashMap<>();
         Map<Integer, Integer> previous = new HashMap<>();
         Set<Integer> visited = new HashSet<>();
 
         for (int key : keys) {
-            distances.put(key, Long.MAX_VALUE);
+            distances.put(key, Integer.MAX_VALUE);
         }
 
-        distances.put(start, 0L);
+        distances.put(start, 0);
 
         while (visited.size() < keys.length) {
             int closestVertex = -1;
-            long minDistance = Long.MAX_VALUE;
+            long minDistance = Integer.MAX_VALUE;
 
             for (int key : keys) {
                 long distance = distances.get(key);
@@ -82,7 +76,8 @@ public class GraphAlgorithms {
                 }
             }
 
-            if (closestVertex == -1) {
+            if (closestVertex == -1)
+            {
                 break;
             }
 
@@ -103,31 +98,24 @@ public class GraphAlgorithms {
                 }
 
                 if (!visited.contains(nextVertex)) {
-                    long newDistance =
-                            distances.get(closestVertex) + weight;
+                    int newDistance = distances.get(closestVertex) + weight;
 
-                    if (newDistance < distances.get(nextVertex)) {
+                    if (newDistance < distances.get(nextVertex)){
                         distances.put(nextVertex, newDistance);
                         previous.put(nextVertex, closestVertex);
                     }
                 }
-
                 neighbor = neighbor.getNext();
             }
         }
 
-        if (distances.get(target) == Long.MAX_VALUE) {
-            return new ArrayList<>();
-        }
-
+        if (distances.get(target) == Integer.MAX_VALUE)
+        {return new ArrayList<>();}
         return restorePath(previous, start, target);
     }
 
-    private List<Integer> restorePath(
-            Map<Integer, Integer> previous,
-            int start,
-            int target
-    ) {
+    private List<Integer> restorePath(Map<Integer, Integer> previous, int start, int target)
+    {
         List<Integer> path = new ArrayList<>();
         int current = target;
 
@@ -139,7 +127,6 @@ public class GraphAlgorithms {
             }
             current = predecessor;
         }
-
         path.add(start);
         Collections.reverse(path);
 

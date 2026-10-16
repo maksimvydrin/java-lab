@@ -51,8 +51,6 @@ public class DelProfile extends Profile {
 
     @Override
     public String toString() {
-        return getId() + ":" + getName()
-                + "(" + getCity() + "," + getBirthYear() + ")"
-                + " причина: " + delReason;
+        return getId() + ":" + getName() + "(" + getCity() + "," + getBirthYear() + ")" + " причина: " + delReason;
     }
 }
