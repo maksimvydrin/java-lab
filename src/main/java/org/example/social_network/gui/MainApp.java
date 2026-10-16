@@ -38,6 +38,7 @@ public class MainApp extends javafx.application.Application {
     private final ObservableList<FriendShip> friendships = FXCollections.observableArrayList();
 
     private final TableView<Object> table = new TableView<>();
+    private GraphCanvas graphCanvas;
     private final ComboBox<Type> typeBox = new ComboBox<>();
     private final Button editButton = new Button("Изменить");
 
@@ -55,10 +56,18 @@ public class MainApp extends javafx.application.Application {
 
         configureActions(stage, addButton, loadButton, saveButton);
         configureTableSelection();
-        HBox controls = new HBox(10, typeBox, addButton, editButton, loadButton, saveButton);
+        HBox controls = new HBox(
+                10, typeBox, addButton, editButton, loadButton, saveButton
+        );
 
-        VBox root = new VBox(10, controls, table);
+        graphCanvas = new GraphCanvas(profiles, friendships);
+
+        SplitPane content = new SplitPane(table, graphCanvas);
+        content.setDividerPositions(0.48);
+
+        VBox root = new VBox(10, controls, content);
         root.setPadding(new Insets(10));
+        VBox.setVgrow(content, javafx.scene.layout.Priority.ALWAYS);
 
         refreshTable();
 
@@ -107,9 +116,12 @@ public class MainApp extends javafx.application.Application {
         csvController.save(stage, typeBox.getValue(), profiles, communities, deleted, friendships);
     }
 
-    private void refreshTable() {
-        TableManager.updateColumnsAndData(table, typeBox.getValue(), profiles, communities, deleted, friendships);
+    private void refreshTable() { TableManager.updateColumnsAndData( table, typeBox.getValue(), profiles, communities, deleted, friendships );
         updateEditButton();
+
+        if (graphCanvas != null) {
+            graphCanvas.refresh();
+        }
     }
 
     private void updateEditButton() {
