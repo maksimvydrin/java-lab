@@ -10,9 +10,7 @@ public class GraphAlgorithms {
             int start,
             int target
     ) {
-        if (graph == null
-                || !graph.containsVertex(start)
-                || !graph.containsVertex(target)) {
+        if (graph == null || !graph.containsVertex(start) || !graph.containsVertex(target)) {
             return new ArrayList<>();
         }
 
@@ -101,9 +99,7 @@ public class GraphAlgorithms {
                 int weight = neighbor.getWeight();
 
                 if (weight < 0) {
-                    throw new IllegalStateException(
-                            "Дейкстра не поддерживает отрицательные веса"
-                    );
+                    throw new IllegalStateException("Дейкстра не поддерживает отрицательные веса");
                 }
 
                 if (!visited.contains(nextVertex)) {
@@ -137,13 +133,10 @@ public class GraphAlgorithms {
 
         while (current != start) {
             path.add(current);
-
             Integer predecessor = previous.get(current);
-
             if (predecessor == null) {
                 return new ArrayList<>();
             }
-
             current = predecessor;
         }
 

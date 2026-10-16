@@ -66,13 +66,10 @@ public final class Controller {
         Profile profile = Dialogs.profileDialog(stage, null);
 
         if (profile != null) {
-            boolean duplicate = profiles.stream()
-                    .anyMatch(p -> p.getId() == profile.getId());
+            boolean duplicate = profiles.stream().anyMatch(p -> p.getId() == profile.getId());
 
             if (duplicate) {
-                GenericDialog.showAlert(
-                        "Профиль с таким ID уже существует."
-                );
+                GenericDialog.showAlert("Профиль с таким ID уже существует.");
                 return;
             }
 
@@ -87,13 +84,10 @@ public final class Controller {
         Community community = Dialogs.communityDialog(stage, null);
 
         if (community != null) {
-            boolean duplicate = communities.stream()
-                    .anyMatch(c -> c.getId() == community.getId());
+            boolean duplicate = communities.stream().anyMatch(c -> c.getId() == community.getId());
 
             if (duplicate) {
-                GenericDialog.showAlert(
-                        "Сообщество с таким ID уже существует."
-                );
+                GenericDialog.showAlert("Сообщество с таким ID уже существует.");
                 return;
             }
 
@@ -112,16 +106,12 @@ public final class Controller {
             return;
         }
 
-        boolean firstExists = profiles.stream()
-                .anyMatch(p -> p.getId() == friendship.getProfile1());
+        boolean firstExists = profiles.stream().anyMatch(p -> p.getId() == friendship.getProfile1());
 
-        boolean secondExists = profiles.stream()
-                .anyMatch(p -> p.getId() == friendship.getProfile2());
+        boolean secondExists = profiles.stream().anyMatch(p -> p.getId() == friendship.getProfile2());
 
         if (!firstExists || !secondExists) {
-            GenericDialog.showAlert(
-                    "Оба профиля должны существовать."
-            );
+            GenericDialog.showAlert("Оба профиля должны существовать.");
             return;
         }
 
@@ -134,12 +124,9 @@ public final class Controller {
         );
 
         if (duplicate) {
-            GenericDialog.showAlert(
-                    "Такая дружба уже существует."
-            );
+            GenericDialog.showAlert("Такая дружба уже существует.");
             return;
         }
-
         friendships.add(friendship);
     }
 }

@@ -71,18 +71,10 @@ public final class CsvLoader {
                     String[] parts = line.split(";", -1);
 
                     if (parts.length != expectedFields) {
-                        throw new LoadCsvException(
-                                ErrorCsv.WRONG_FIELD_COUNT,
-                                lineNumber,
-                                "Ожидалось " + expectedFields
-                                        + " полей, получено "
-                                        + parts.length
-                        );
+                        throw new LoadCsvException(ErrorCsv.WRONG_FIELD_COUNT, lineNumber, "Ожидалось " + expectedFields + " полей, получено "+ +parts.length);
                     }
 
-                    Object item = parseLine(
-                            header, parts, lineNumber
-                    );
+                    Object item = parseLine(header, parts, lineNumber);
 
                     @SuppressWarnings("unchecked")
                     T typedItem = (T) item;
@@ -102,12 +94,7 @@ public final class CsvLoader {
             }
 
         } catch (IOException e) {
-            throw new LoadCsvException(
-                    ErrorCsv.IO_ERROR,
-                    0,
-                    "Ошибка чтения файла: " + file,
-                    e
-            );
+            throw new LoadCsvException(ErrorCsv.IO_ERROR, 0, "Ошибка чтения файла: " + file, e);
         }
 
         return new LoadCsvResult<>(result, errors);
@@ -169,11 +156,7 @@ public final class CsvLoader {
             return friendship;
         }
 
-        throw new LoadCsvException(
-                ErrorCsv.INVALID_DATA,
-                lineNumber,
-                "Неизвестный тип данных"
-        );
+        throw new LoadCsvException(ErrorCsv.INVALID_DATA, lineNumber, "Неизвестный тип данных");
     }
 
     private void validateModel(
@@ -184,10 +167,7 @@ public final class CsvLoader {
         List<String> validationErrors = item.validate();
 
         if (!validationErrors.isEmpty()) {
-            throw new LoadCsvException(
-                    ErrorCsv.INVALID_DATA,
-                    lineNumber,
-                    String.join("; ", validationErrors)
+            throw new LoadCsvException(ErrorCsv.INVALID_DATA, lineNumber, String.join("; ", validationErrors)
             );
         }
     }
@@ -201,12 +181,7 @@ public final class CsvLoader {
         try {
             return Integer.parseInt(value.trim());
         } catch (NumberFormatException e) {
-            throw new LoadCsvException(
-                    ErrorCsv.BAD_NUMBER,
-                    lineNumber,
-                    "Поле '" + fieldName
-                            + "' должно быть целым числом",
-                    e
+            throw new LoadCsvException(ErrorCsv.BAD_NUMBER, lineNumber, "Поле '" + fieldName + "' должно быть целым числом", e
             );
         }
     }

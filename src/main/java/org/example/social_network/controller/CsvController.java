@@ -159,9 +159,7 @@ public final class CsvController {
                 )
         );
 
-        return save
-                ? chooser.showSaveDialog(stage)
-                : chooser.showOpenDialog(stage);
+        return save ? chooser.showSaveDialog(stage) : chooser.showOpenDialog(stage);
     }
 
     private String formatError(LoadCsvException error) {

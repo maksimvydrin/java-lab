@@ -1,4 +1,3 @@
-
 package org.example.social_network.gui;
 
 import javafx.stage.Stage;
@@ -11,86 +10,65 @@ public final class Dialogs {
     private Dialogs() {}
 
     public static Profile profileDialog(Stage owner, Profile profile) {
+        boolean isEdit = (profile != null);
+        String title = isEdit ? "Изменить профиль" : "Добавить профиль";
+
         List<FieldSpec> fields = List.of(
-                new FieldSpec("ID:",
-                        profile != null ? String.valueOf(profile.getId()) : ""),
-                new FieldSpec("Имя:",
-                        profile != null ? profile.getName() : ""),
-                new FieldSpec("Город:",
-                        profile != null ? profile.getCity() : ""),
-                new FieldSpec("Год рождения:",
-                        profile != null ? String.valueOf(profile.getBirthYear()) : "")
+                new FieldSpec("ID:", isEdit ? String.valueOf(profile.getId()) : ""),
+                new FieldSpec("Имя:", isEdit ? profile.getName() : ""),
+                new FieldSpec("Город:", isEdit ? profile.getCity() : ""),
+                new FieldSpec("Год рождения:", isEdit ? String.valueOf(profile.getBirthYear()) : "")
         );
 
-        return GenericDialog.show(
-                owner,
-                profile == null ? "Добавить профиль" : "Изменить профиль",
-                fields,
-                values -> new Profile(
-                        Integer.parseInt(values.get(0)),
-                        values.get(1),
-                        values.get(2),
-                        Integer.parseInt(values.get(3))
-                )
-        );
+        return GenericDialog.show(owner, title, fields, values -> {
+            int id = Integer.parseInt(values.get(0));
+            String name = values.get(1);
+            String city = values.get(2);
+            int birthYear = Integer.parseInt(values.get(3));
+
+            return new Profile(id, name, city, birthYear);
+        });
     }
 
     public static Community communityDialog(Stage owner, Community community) {
+        boolean isEdit = (community != null);
+        String title = isEdit ? "Изменить сообщество" : "Добавить сообщество";
+
         List<FieldSpec> fields = List.of(
-                new FieldSpec("ID:",
-                        community != null ? String.valueOf(community.getId()) : "",
-                        community != null),
-                new FieldSpec("Название:",
-                        community != null ? community.getName() : ""),
-                new FieldSpec("Город:",
-                        community != null ? community.getCity() : ""),
-                new FieldSpec("Год создания:",
-                        community != null ? String.valueOf(community.getBirthYear()) : ""),
-                new FieldSpec("Администратор:",
-                        community != null ? String.valueOf(community.getAdminId()) : "")
+                new FieldSpec("ID:", isEdit ? String.valueOf(community.getId()) : "", isEdit),
+                new FieldSpec("Название:", isEdit ? community.getName() : ""),
+                new FieldSpec("Город:", isEdit ? community.getCity() : ""),
+                new FieldSpec("Год создания:", isEdit ? String.valueOf(community.getBirthYear()) : ""),
+                new FieldSpec("Администратор:", isEdit ? String.valueOf(community.getAdminId()) : "")
         );
 
-        return GenericDialog.show(
-                owner,
-                community == null ? "Добавить сообщество" : "Изменить сообщество",
-                fields,
-                values -> new Community(
-                        Integer.parseInt(values.get(0)),
-                        values.get(1),
-                        values.get(2),
-                        Integer.parseInt(values.get(3)),
-                        Integer.parseInt(values.get(4))
-                )
-        );
+        return GenericDialog.show(owner, title, fields, values -> {
+            int id = Integer.parseInt(values.get(0));
+            String name = values.get(1);
+            String city = values.get(2);
+            int birthYear = Integer.parseInt(values.get(3));
+            int adminId = Integer.parseInt(values.get(4));
+
+            return new Community(id, name, city, birthYear, adminId);
+        });
     }
 
-    public static FriendShip friendshipDialog(
-            Stage owner,
-            FriendShip friendship
-    ) {
+    public static FriendShip friendshipDialog(Stage owner, FriendShip friendship) {
+        boolean isEdit = (friendship != null);
+        String title = isEdit ? "Изменить дружбу" : "Добавить дружбу";
+
         List<FieldSpec> fields = List.of(
-                new FieldSpec("Профиль 1:",
-                        friendship != null
-                                ? String.valueOf(friendship.getProfile1()) : "",
-                        friendship != null),
-                new FieldSpec("Профиль 2:",
-                        friendship != null
-                                ? String.valueOf(friendship.getProfile2()) : "",
-                        friendship != null),
-                new FieldSpec("Сила связи:",
-                        friendship != null
-                                ? String.valueOf(friendship.getStrength()) : "")
+                new FieldSpec("Профиль 1:", isEdit ? String.valueOf(friendship.getProfile1()) : "", isEdit),
+                new FieldSpec("Профиль 2:", isEdit ? String.valueOf(friendship.getProfile2()) : "", isEdit),
+                new FieldSpec("Сила связи:", isEdit ? String.valueOf(friendship.getStrength()) : "")
         );
 
-        return GenericDialog.show(
-                owner,
-                friendship == null ? "Добавить дружбу" : "Изменить дружбу",
-                fields,
-                values -> new FriendShip(
-                        Integer.parseInt(values.get(0)),
-                        Integer.parseInt(values.get(1)),
-                        Integer.parseInt(values.get(2))
-                )
-        );
+        return GenericDialog.show(owner, title, fields, values -> {
+            int profile1 = Integer.parseInt(values.get(0));
+            int profile2 = Integer.parseInt(values.get(1));
+            int strength = Integer.parseInt(values.get(2));
+
+            return new FriendShip(profile1, profile2, strength);
+        });
     }
 }

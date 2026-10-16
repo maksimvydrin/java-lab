@@ -56,17 +56,13 @@ public class SocialGraph {
 
     public synchronized void addVertex(Profile profile) {
         if (profile == null) {
-            throw new IllegalArgumentException(
-                    "Профиль не должен быть null"
-            );
+            throw new IllegalArgumentException("Профиль не должен быть null");
         }
 
         int key = profile.getId();
 
         if (key <= 0) {
-            throw new IllegalArgumentException(
-                    "ID профиля должен быть положительным"
-            );
+            throw new IllegalArgumentException("ID профиля должен быть положительным");
         }
 
         int index = getIndex(key);
@@ -90,48 +86,33 @@ public class SocialGraph {
         return findNode(vertexId) != null;
     }
 
-    public synchronized void addEdge(
-            int fromId,
-            int toId,
-            int weight
-    ) {
+    public synchronized void addEdge(int fromId, int toId, int weight)
+    {
         if (fromId <= 0 || toId <= 0) {
-            throw new IllegalArgumentException(
-                    "ID вершин должны быть положительными"
-            );
+            throw new IllegalArgumentException("ID вершин должны быть положительными");
         }
 
         if (fromId == toId) {
-            throw new IllegalArgumentException(
-                    "Вершина не может быть связана сама с собой"
-            );
+            throw new IllegalArgumentException("Вершина не может быть связана сама с собой");
         }
 
         if (weight < 0) {
-            throw new IllegalArgumentException(
-                    "Вес ребра не может быть отрицательным"
-            );
+            throw new IllegalArgumentException("Вес ребра не может быть отрицательным");
         }
 
         HashNode from = findNode(fromId);
         HashNode to = findNode(toId);
 
         if (from == null || to == null) {
-            throw new IllegalArgumentException(
-                    "Обе вершины должны существовать в графе"
-            );
+            throw new IllegalArgumentException("Обе вершины должны существовать в графе");
         }
 
-        // Сначала проверяем обе вершины, затем изменяем граф.
         addToList(from, toId, weight);
         addToList(to, fromId, weight);
     }
 
-    private void addToList(
-            HashNode vertex,
-            int neighborId,
-            int weight
-    ) {
+    private void addToList(HashNode vertex, int neighborId, int weight)
+    {
         GraphNode current = vertex.head;
 
         while (current != null) {
@@ -168,7 +149,6 @@ public class SocialGraph {
                 current = current.next;
             }
         }
-
         return keys;
     }
 }
