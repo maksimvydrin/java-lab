@@ -22,14 +22,33 @@ public final class Controller {
 
     public void edit(Stage stage, Object selected) {
         if (selected instanceof Community community) {
-            Dialogs.communityDialog(stage, community);
+            Community candidate = Dialogs.communityDialog(stage, community);
+
+            if (candidate != null) {
+                community.setName(candidate.getName());
+                community.setCity(candidate.getCity());
+                community.setBirthYear(candidate.getBirthYear());
+                community.setAdminId(candidate.getAdminId());
+            }
+
         } else if (selected instanceof Profile profile) {
-            Dialogs.profileDialog(stage, profile);
+            Profile candidate = Dialogs.profileDialog(stage, profile);
+
+            if (candidate != null) {
+                profile.setId(candidate.getId());
+                profile.setName(candidate.getName());
+                profile.setCity(candidate.getCity());
+                profile.setBirthYear(candidate.getBirthYear());
+            }
+
         } else if (selected instanceof FriendShip friendship) {
-            Dialogs.friendshipDialog(stage, friendship);
+            FriendShip candidate = Dialogs.friendshipDialog(stage, friendship);
+
+            if (candidate != null) {
+                friendship.setStrength(candidate.getStrength());
+            }
         }
     }
-
     private void addProfile(Stage stage, ObservableList<Profile> profiles) {
         Profile profile = Dialogs.profileDialog(stage, null);
         if (profile != null) profiles.add(profile);

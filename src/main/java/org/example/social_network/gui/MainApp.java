@@ -79,18 +79,18 @@ public class MainApp extends javafx.application.Application {
     private void configureTypeBox() {
         typeBox.getItems().addAll(Type.values());
         typeBox.setValue(Type.PROFILE);
-        typeBox.setOnAction(event -> refreshTable());
+        typeBox.setOnAction(_ -> refreshTable());
     }
 
     private void configureActions(Stage stage, Button addButton, Button loadButton, Button saveButton) {
-        addButton.setOnAction(event -> addEntity(stage));
-        editButton.setOnAction(event -> editEntity(stage));
-        loadButton.setOnAction(event -> loadCsv(stage));
-        saveButton.setOnAction(event -> saveCsv(stage));
+        addButton.setOnAction(_ -> addEntity(stage));
+        editButton.setOnAction(_ -> editEntity(stage));
+        loadButton.setOnAction(_ -> loadCsv(stage));
+        saveButton.setOnAction(_ -> saveCsv(stage));
     }
 
     private void configureTableSelection() {
-        table.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> updateEditButton());
+        table.getSelectionModel().selectedItemProperty().addListener((_, _, _) -> updateEditButton());
     }
 
     private void addEntity(Stage stage) {
