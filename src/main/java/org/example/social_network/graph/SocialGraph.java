@@ -1,46 +1,47 @@
-
 package org.example.social_network.graph;
 
-import org.example.social_network.model.Profile;
+import java.util.ArrayList;
+import java.util.List;
 
-public class SocialGraph {
+public class SocialGraph<K extends Comparable<K>, V> {
 
-    private static class HashNode {
-        int key;
-        Profile profile;
-        GraphNode head;
-        HashNode next;
+    private static class HashNode<K, V> {
+        K key;
+        V value;
+        GraphNode<K> head;
+        HashNode<K, V> next;
 
-        HashNode(int key, Profile profile) {
+        HashNode(K key, V value) {
             this.key = key;
-            this.profile = profile;
+            this.value = value;
         }
     }
 
-    private HashNode[] table;
+    private HashNode<K, V>[] table;
     private int size;
 
     private static final int CAPACITY = 16;
 
     public SocialGraph() {
-        table = new HashNode[CAPACITY];
+        table = (HashNode<K, V>[]) new HashNode[CAPACITY];
         size = 0;
     }
 
-    private int getIndex(int key) {
-        return Math.floorMod(key, table.length);
+    private int getIndex(K key) {
+        if (key == null) return 0;
+        return Math.abs(key.hashCode()) % table.length;
     }
 
-    private HashNode findNode(int vertexId) {
-        if (vertexId <= 0) {
+    private HashNode<K, V> findNode(K vertexKey) {
+        if (vertexKey == null) {
             return null;
         }
 
-        int index = getIndex(vertexId);
-        HashNode current = table[index];
+        int index = getIndex(vertexKey);
+        HashNode<K, V> current = table[index];
 
         while (current != null) {
-            if (current.key == vertexId) {
+            if (current.key.equals(vertexKey)) {
                 return current;
             }
             current = current.next;
@@ -49,50 +50,43 @@ public class SocialGraph {
         return null;
     }
 
-    public synchronized void clear() {
-        table = new HashNode[CAPACITY];
+        public synchronized void clear() {
+        table = (HashNode<K, V>[]) new HashNode[CAPACITY];
         size = 0;
     }
 
-    public synchronized void addVertex(Profile profile) {
-        if (profile == null) {
-            throw new IllegalArgumentException("Профиль не должен быть null");
-        }
-
-        int key = profile.getId();
-
-        if (key <= 0) {
-            throw new IllegalArgumentException("ID профиля должен быть положительным");
+    public synchronized void addVertex(K key, V value) {
+        if (key == null || value == null) {
+            throw new IllegalArgumentException("Ключ и значение не должны быть null");
         }
 
         int index = getIndex(key);
-        HashNode current = table[index];
+        HashNode<K, V> current = table[index];
 
         while (current != null) {
-            if (current.key == key) {
-                current.profile = profile;
+            if (current.key.equals(key)) {
+                current.value = value; // Обновляем значение, если ключ уже есть
                 return;
             }
             current = current.next;
         }
 
-        HashNode newNode = new HashNode(key, profile);
+        HashNode<K, V> newNode = new HashNode<>(key, value);
         newNode.next = table[index];
         table[index] = newNode;
         size++;
     }
 
-    public synchronized boolean containsVertex(int vertexId) {
-        return findNode(vertexId) != null;
+    public synchronized boolean containsVertex(K vertexKey) {
+        return findNode(vertexKey) != null;
     }
 
-    public synchronized void addEdge(int fromId, int toId, int weight)
-    {
-        if (fromId <= 0 || toId <= 0) {
-            throw new IllegalArgumentException("ID вершин должны быть положительными");
+    public synchronized void addEdge(K fromKey, K toKey, int weight) {
+        if (fromKey == null || toKey == null) {
+            throw new IllegalArgumentException("Ключи вершин не должны быть null");
         }
 
-        if (fromId == toId) {
+        if (fromKey.equals(toKey)) {
             throw new IllegalArgumentException("Вершина не может быть связана сама с собой");
         }
 
@@ -100,36 +94,35 @@ public class SocialGraph {
             throw new IllegalArgumentException("Вес ребра не может быть отрицательным");
         }
 
-        HashNode from = findNode(fromId);
-        HashNode to = findNode(toId);
+        HashNode<K, V> from = findNode(fromKey);
+        HashNode<K, V> to = findNode(toKey);
 
         if (from == null || to == null) {
             throw new IllegalArgumentException("Обе вершины должны существовать в графе");
         }
 
-        addToList(from, toId, weight);
-        addToList(to, fromId, weight);
+        addToList(from, toKey, weight);
+        addToList(to, fromKey, weight);
     }
 
-    private void addToList(HashNode vertex, int neighborId, int weight)
-    {
-        GraphNode current = vertex.head;
+    private void addToList(HashNode<K, V> vertex, K neighborKey, int weight) {
+        GraphNode<K> current = vertex.head;
 
         while (current != null) {
-            if (current.getVertexId() == neighborId) {
+            if (current.getVertexKey().equals(neighborKey)) {
                 current.setWeight(weight);
                 return;
             }
             current = current.getNext();
         }
 
-        GraphNode newNode = new GraphNode(neighborId, weight);
+        GraphNode<K> newNode = new GraphNode<>(neighborKey, weight);
         newNode.setNext(vertex.head);
         vertex.head = newNode;
     }
 
-    public synchronized GraphNode getNeighbors(int vertexId) {
-        HashNode node = findNode(vertexId);
+    public synchronized GraphNode<K> getNeighbors(K vertexKey) {
+        HashNode<K, V> node = findNode(vertexKey);
         return node == null ? null : node.head;
     }
 
@@ -137,15 +130,13 @@ public class SocialGraph {
         return size;
     }
 
-    public synchronized int[] getAllKeys() {
-        int[] keys = new int[size];
-        int count = 0;
+    public synchronized List<K> getAllKeys() {
+        List<K> keys = new ArrayList<>();
 
-        for (HashNode currentBucket : table) {
-            HashNode current = currentBucket;
-
+        for (HashNode<K, V> currentBucket : table) {
+            HashNode<K, V> current = currentBucket;
             while (current != null) {
-                keys[count++] = current.key;
+                keys.add(current.key);
                 current = current.next;
             }
         }

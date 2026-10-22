@@ -18,7 +18,6 @@ public final class CsvSaver {
                     "Для пустого списка необходимо указать заголовок CSV"
             );
         }
-
         save(items, file, getHeader(items.get(0)));
     }
 

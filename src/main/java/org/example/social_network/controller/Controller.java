@@ -116,11 +116,9 @@ public final class Controller {
         }
 
         boolean duplicate = friendships.stream().anyMatch(f ->
-                (f.getProfile1() == friendship.getProfile1()
-                        && f.getProfile2() == friendship.getProfile2())
+                (f.getProfile1() == friendship.getProfile1() && f.getProfile2() == friendship.getProfile2())
                 ||
-                (f.getProfile1() == friendship.getProfile2()
-                        && f.getProfile2() == friendship.getProfile1())
+                (f.getProfile1() == friendship.getProfile2() && f.getProfile2() == friendship.getProfile1())
         );
 
         if (duplicate) {

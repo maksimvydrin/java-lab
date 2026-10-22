@@ -2,6 +2,7 @@
 package org.example.social_network.controller;
 
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.social_network.csv.CsvLoader;
@@ -17,33 +18,39 @@ import java.nio.file.Path;
 
 public final class CsvController {
 
-    public void load(
-            Stage stage,
-            MainApp.Type type,
-            ObservableList<Profile> profiles,
-            ObservableList<Community> communities,
-            ObservableList<DelProfile> deleted,
-            ObservableList<FriendShip> friendships
-    ) {
+    public void load(Stage stage, MainApp.Type type, ObservableList<Profile> profiles,
+                     ObservableList<Community> communities, ObservableList<DelProfile> deleted,
+                     ObservableList<FriendShip> friendships) {
         File file = chooseFile(stage, "Загрузить CSV", false);
+        if (file == null) return;
 
-        if (file == null) {
-            return;
-        }
 
-        try {
-            loadInto(
-                    file.toPath(), type,
-                    profiles, communities, deleted, friendships
-            );
-        } catch (LoadCsvException e) {
-            GenericDialog.showAlert(formatError(e));
-        } catch (Exception e) {
-            GenericDialog.showAlert(
-                    "Ошибка загрузки: " + e.getMessage()
-            );
-        }
+        Task<Void> loadTask = new Task<>() {
+            @Override
+            protected Void call() throws Exception {
+                loadInto(file.toPath(), type, profiles, communities, deleted, friendships);
+                return null;
+            }
+        };
+
+        loadTask.setOnSucceeded(event -> {
+            GenericDialog.showAlert("Файл успешно загружен!");
+        });
+
+        loadTask.setOnFailed(event -> {
+            Throwable e = loadTask.getException();
+            if (e instanceof LoadCsvException) {
+                GenericDialog.showAlert(formatError((LoadCsvException) e));
+            } else {
+                GenericDialog.showAlert("Ошибка загрузки: " + e.getMessage());
+            }
+        });
+
+        Thread backgroundThread = new Thread(loadTask);
+        backgroundThread.setDaemon(true);
+        backgroundThread.start();
     }
+
 
     public void save(
             Stage stage,
@@ -107,7 +114,9 @@ public final class CsvController {
             LoadCsvResult<T> result,
             StringBuilder errors
     ) {
-        target.setAll(result.getItems());
+        javafx.application.Platform.runLater(() -> {
+            target.setAll(result.getItems());
+        });
 
         result.getErrors().forEach(error ->
                 errors.append(formatError(error)).append('\n')

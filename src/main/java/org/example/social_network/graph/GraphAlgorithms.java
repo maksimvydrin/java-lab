@@ -1,11 +1,13 @@
 
 package org.example.social_network.graph;
 
+import org.example.social_network.model.Profile;
+
 import java.util.*;
 
 public class GraphAlgorithms {
 
-    public List<Integer> bfs(SocialGraph graph, int start, int target)
+    public List<Integer> bfs(SocialGraph<Integer, Profile> graph , int start, int target)
     {
         if (graph == null || !graph.containsVertex(start) || !graph.containsVertex(target)) {
             return new ArrayList<>();
@@ -25,10 +27,10 @@ public class GraphAlgorithms {
                 return restorePath(previous, start, target);
             }
 
-            GraphNode neighbor = graph.getNeighbors(current);
+            GraphNode<Integer> neighbor = graph.getNeighbors(current);
 
             while (neighbor != null) {
-                int neighborId = neighbor.getVertexId();
+                int neighborId = neighbor.getVertexKey();
 
                 if (visited.add(neighborId)) {
                     previous.put(neighborId, current);
@@ -41,7 +43,7 @@ public class GraphAlgorithms {
     }
 
     public List<Integer> dijkstra(
-            SocialGraph graph,
+            SocialGraph<Integer,Profile> graph,
             int start,
             int target
     ) {
@@ -50,7 +52,7 @@ public class GraphAlgorithms {
             return new ArrayList<>();
         }
 
-        int[] keys = graph.getAllKeys();
+        List<Integer> keys = graph.getAllKeys();
 
         Map<Integer, Integer> distances = new HashMap<>();
         Map<Integer, Integer> previous = new HashMap<>();
@@ -62,7 +64,7 @@ public class GraphAlgorithms {
 
         distances.put(start, 0);
 
-        while (visited.size() < keys.length) {
+        while (visited.size() < keys.size()) {
             int closestVertex = -1;
             long minDistance = Integer.MAX_VALUE;
 
@@ -87,10 +89,10 @@ public class GraphAlgorithms {
                 break;
             }
 
-            GraphNode neighbor = graph.getNeighbors(closestVertex);
+            GraphNode<Integer> neighbor = graph.getNeighbors(closestVertex);
 
             while (neighbor != null) {
-                int nextVertex = neighbor.getVertexId();
+                int nextVertex = neighbor.getVertexKey();
                 int weight = neighbor.getWeight();
 
                 if (weight < 0) {

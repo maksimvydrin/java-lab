@@ -1,18 +1,18 @@
 package org.example.social_network.graph;
 
-public class GraphNode {
-    private int vertexId;
+public class GraphNode<K> {
+    private K vertexKey;
     private int weight;
-    private GraphNode next;
+    private GraphNode<K> next;
 
-    public GraphNode(int vertexId, int weight) {
-        this.vertexId = vertexId;
+    public GraphNode(K vertexKey, int weight) {
+        this.vertexKey = vertexKey;
         this.weight = weight;
         this.next = null;
     }
 
-    public int getVertexId() {
-        return vertexId;
+    public K getVertexKey() {
+        return vertexKey;
     }
 
     public int getWeight() {
@@ -23,11 +23,11 @@ public class GraphNode {
         this.weight = weight;
     }
 
-    public GraphNode getNext() {
+    public GraphNode<K> getNext() {
         return next;
     }
 
-    public void setNext(GraphNode next) {
+    public void setNext(GraphNode<K> next) { // Принимаем GraphNode<K>
         this.next = next;
     }
 }

@@ -21,7 +21,7 @@ public class ConcurrencyDemo {
                         int id = threadIndex * 1000 + j + 1;
                         Profile profile = new Profile(id, "Поток " + threadIndex + " - Юзер " + j, "Город", 2000);
 
-                        graph.addVertex(profile);
+                        graph.addVertex(profile.getId(),profile);
 
                         if (j > 0) {
                             graph.addEdge(id, id - 1, 5);

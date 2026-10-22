@@ -132,19 +132,22 @@ public final class CsvLoader {
         }
 
         if (DELETED_HEADER.equals(header)) {
-            DelProfile profile = new DelProfile(
-                    parseInt(parts[0], lineNumber, "ID"),
-                    parts[1],
-                    parts[2],
-                    parseInt(parts[3], lineNumber, "Год рождения"),
-                    parseInt(parts[4], lineNumber, "Дата удаления"),
-                    parts[5]
-            );
-
-            validateModel(profile, lineNumber);
-            return profile;
+            try {
+                DelProfile profile = new DelProfile(
+                        parseInt(parts[0], lineNumber, "ID"),
+                        parts[1],
+                        parts[2],
+                        parseInt(parts[3], lineNumber, "Год рождения"),
+                        parseInt(parts[4], lineNumber, "Дата удаления"),
+                        parts[5]
+                );
+                return profile;
+            } catch (IllegalArgumentException e) {
+                List<String> errors = new ArrayList<>();
+                errors.add(e.getMessage());
+                throw new LoadCsvException(ErrorCsv.INVALID_DATA, lineNumber, e.getMessage());
+            }
         }
-
         if (FRIENDSHIP_HEADER.equals(header)) {
             FriendShip friendship = new FriendShip(
                     parseInt(parts[0], lineNumber, "ID первого профиля"),

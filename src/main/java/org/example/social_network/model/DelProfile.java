@@ -4,50 +4,40 @@ package org.example.social_network.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DelProfile extends Profile {
+public final class DelProfile{
 
-    private String delReason;
-    private int dayDel;
+    private final int id;
+    private final String name;
+    private final String city;
+    private final int birthYear;
+    private final String delReason;
+    private final int dayDel;
 
-    public DelProfile(
-            int id,
-            String name,
-            String city,
-            int birthYear,
-            int dayDel,
-            String reason
-    ) {
-        super(id, name, city, birthYear);
+    public DelProfile(int id, String name, String city, int birthYear, int dayDel, String reason) {
+        if (reason == null || reason.isBlank()) {
+            throw new IllegalArgumentException("Причина удаления не может быть пустой");
+        }
+        if (dayDel <= 0) {
+            throw new IllegalArgumentException("Дата удаления должна быть больше 0");
+        }
+        if (id <= 0) {
+            throw new IllegalArgumentException("ID должен быть больше 0");
+        }
+
+        this.id = id;
+        this.name = name;
+        this.city = city;
+        this.birthYear = birthYear;
         this.delReason = reason;
         this.dayDel = dayDel;
     }
 
-    public String getDelReason() {
-        return delReason;
-    }
-
-    public int getDayDel() {
-        return dayDel;
-    }
-
-    public void setDayDel(int dayDel) {
-        this.dayDel = dayDel;
-    }
-
-    @Override
-    public List<String> validate() {
-        List<String> errors = new ArrayList<>(super.validate());
-
-        if (delReason == null || delReason.isBlank()) {
-            errors.add("Причина удаления не может быть пустой");
-        }
-
-        if (dayDel <= 0) {
-            errors.add("Дата удаления должна быть больше 0");
-        }
-
-        return errors;
-    }
+    public int getId() {return id;}
+    public String getName() {return name;}
+    public String getCity() {return city;}
+    public int getBirthYear() {return birthYear;}
+    public int getDayDel() {return dayDel;}
+    public String getDelReason() {return delReason;}
 
     @Override
     public String toString() {

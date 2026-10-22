@@ -9,11 +9,15 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.scene.layout.GridPane;
 
 import org.example.social_network.controller.CsvController;
 import org.example.social_network.controller.Controller;
+import org.example.social_network.controller.DataGenerator;
 import org.example.social_network.graph.SocialGraph;
 import org.example.social_network.model.*;
+import org.example.social_network.graph.GraphAlgorithms;
+import java.util.List;
 
 public class MainApp extends javafx.application.Application {
 
@@ -53,7 +57,7 @@ public class MainApp extends javafx.application.Application {
 
     private final Controller entityController = new Controller();
     private final CsvController csvController = new CsvController();
-    private final SocialGraph socialGraph = new SocialGraph();
+    private final SocialGraph<Integer, Profile> socialGraph = new SocialGraph<>();
 
     private GraphCanvas graphCanvas;
 
@@ -68,14 +72,46 @@ public class MainApp extends javafx.application.Application {
         configureActions(stage, addButton, loadButton, saveButton);
         configureTableSelection();
 
-        HBox controls = new HBox(
-                10,
+        TextField genCountField = new TextField("1000");
+        genCountField.setPrefWidth(70);
+        Button genButton = new Button("Сгенерировать");
+        Button cancelGenButton = new Button("Отмена");
+        Button pathButton = new Button("Найти путь");
+        pathButton.setOnAction(event -> findPathDialog());
+        cancelGenButton.setDisable(true);
+
+        DataGenerator dataGenerator = new DataGenerator();
+
+        genButton.setOnAction(event -> {
+            try {
+                int count = Integer.parseInt(genCountField.getText());
+                genButton.setDisable(true);
+                cancelGenButton.setDisable(false);
+
+
+                dataGenerator.startGeneration(profiles, friendships, count);
+
+            } catch (NumberFormatException e) {
+                GenericDialog.showAlert("Введите целое число для генерации");
+            }
+        });
+
+        cancelGenButton.setOnAction(event -> {
+            dataGenerator.cancelGeneration();
+            genButton.setDisable(false);
+            cancelGenButton.setDisable(true);
+        });
+
+        HBox controls = new HBox(10,
                 typeBox,
                 addButton,
                 editButton,
                 loadButton,
-                saveButton
-        );
+                saveButton,
+                pathButton,
+                genCountField,
+                genButton,
+                cancelGenButton);
 
         graphCanvas = new GraphCanvas(profiles, friendships);
 
@@ -91,6 +127,61 @@ public class MainApp extends javafx.application.Application {
         stage.setTitle("Социальная сеть");
         stage.setScene(new Scene(root, 900, 600));
         stage.show();
+    }
+
+    private void findPathDialog() {
+        rebuildGraph();
+
+        if (socialGraph.size() == 0) {
+            GenericDialog.showAlert("Граф пуст. Сначала добавьте или сгенерируйте профили.");
+            return;
+        }
+
+        Dialog<String[]> dialog = new Dialog<>();
+        dialog.setTitle("Найти кратчайший путь");
+        dialog.setHeaderText(null);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+
+        TextField startField = new TextField();
+        TextField targetField = new TextField();
+
+        grid.add(new Label("ID откуда:"), 0, 0);
+        grid.add(startField, 1, 0);
+        grid.add(new Label("ID куда:"), 0, 1);
+        grid.add(targetField, 1, 1);
+
+        dialog.getDialogPane().setContent(grid);
+        dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+        dialog.setResultConverter(button -> {
+            if (button == ButtonType.OK) {
+                return new String[]{startField.getText(), targetField.getText()};
+            }
+            return null;
+        });
+
+        dialog.showAndWait().ifPresent(result -> {
+            try {
+                int startId = Integer.parseInt(result[0].trim());
+                int targetId = Integer.parseInt(result[1].trim());
+
+                org.example.social_network.graph.GraphAlgorithms algo =
+                        new org.example.social_network.graph.GraphAlgorithms();
+
+                java.util.List<Integer> path = algo.dijkstra(socialGraph, startId, targetId);
+
+                if (path.isEmpty()) {
+                    GenericDialog.showAlert("Путь не найден или вершины отсутствуют.");
+                } else {
+                    GenericDialog.showAlert("Кратчайший путь: " + path.toString());
+                }
+            } catch (NumberFormatException e) {
+                GenericDialog.showAlert("Введите корректные числовые ID.");
+            }
+        });
     }
 
     private void configureTypeBox() {
@@ -182,7 +273,7 @@ public class MainApp extends javafx.application.Application {
 
         for (Profile profile : profiles) {
             if (!socialGraph.containsVertex(profile.getId())) {
-                socialGraph.addVertex(profile);
+                socialGraph.addVertex(profile.getId(), profile);
             }
         }
 
