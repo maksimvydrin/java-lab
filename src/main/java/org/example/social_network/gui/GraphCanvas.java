@@ -51,7 +51,6 @@ public class GraphCanvas extends Region {
 
         GraphicsContext gc = canvas.getGraphicsContext2D();
 
-        // Фон
         gc.setFill(Color.WHITE);
         gc.fillRect(0, 0, width, height);
 
@@ -62,7 +61,6 @@ public class GraphCanvas extends Region {
             return;
         }
 
-        // Рассчитываем позиции вершин по окружности
         Map<Integer, double[]> positions = new HashMap<>();
 
         double centerX = width / 2;
@@ -84,7 +82,6 @@ public class GraphCanvas extends Region {
             positions.put(profile.getId(), new double[]{x, y});
         }
 
-        // Сначала рисуем рёбра, чтобы они были под вершинами
         gc.setStroke(Color.LIGHTGRAY);
         gc.setLineWidth(2);
         gc.setFont(Font.font(11));
@@ -93,7 +90,6 @@ public class GraphCanvas extends Region {
             double[] first = positions.get(friendship.getProfile1());
             double[] second = positions.get(friendship.getProfile2());
 
-            // Пропускаем связи с отсутствующими профилями
             if (first == null || second == null) {
                 continue;
             }
@@ -105,7 +101,6 @@ public class GraphCanvas extends Region {
                     second[0], second[1]
             );
 
-            // Сила связи возле середины ребра
             double middleX = (first[0] + second[0]) / 2;
             double middleY = (first[1] + second[1]) / 2;
 
@@ -117,7 +112,6 @@ public class GraphCanvas extends Region {
             );
         }
 
-        // Затем рисуем вершины
         for (Profile profile : profiles) {
             double[] point = positions.get(profile.getId());
             double x = point[0];

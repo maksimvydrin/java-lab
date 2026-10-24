@@ -43,8 +43,8 @@ public class ConcurrencyDemo {
             }
         }
 
-        System.out.println("Все потоки завершили работу!");
-        System.out.println("Ожидаемый размер графа: " + (threadCount * operationsPerThread));
-        System.out.println("Фактический размер графа: " + graph.size());
+        System.out.println("все потоки завершили работу");
+        System.out.println("ожидаемый размер графа: " + (threadCount * operationsPerThread));
+        System.out.println("фактический размер графа: " + graph.size());
     }
 }

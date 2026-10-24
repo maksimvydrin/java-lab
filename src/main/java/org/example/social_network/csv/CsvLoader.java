@@ -63,7 +63,7 @@ public final class CsvLoader {
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
 
-                if (line.isBlank()) {
+                if (line.isEmpty()) {
                     continue;
                 }
 
@@ -76,9 +76,7 @@ public final class CsvLoader {
 
                     Object item = parseLine(header, parts, lineNumber);
 
-                    @SuppressWarnings("unchecked")
                     T typedItem = (T) item;
-
                     result.add(typedItem);
 
                 } catch (LoadCsvException e) {

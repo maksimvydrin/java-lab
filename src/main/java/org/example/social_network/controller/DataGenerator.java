@@ -23,7 +23,18 @@ public class DataGenerator {
             @Override
             protected Void call() throws Exception {
                 Random random = new Random();
-                int startId = profiles.isEmpty() ? 1 : profiles.stream().mapToInt(Profile::getId).max().orElse(0) + 1;
+                int startId = 1;
+
+                if (!profiles.isEmpty()) {
+                    int maxId = 0;
+
+                    for (Profile p : profiles) {
+                        if (p.getId() > maxId) {
+                            maxId = p.getId();
+                        }
+                    }
+                    startId = maxId + 1;
+                }
 
 
                 java.util.List<Profile> profileBatch = new java.util.ArrayList<>();
