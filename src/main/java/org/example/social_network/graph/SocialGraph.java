@@ -65,7 +65,7 @@ public class SocialGraph<K extends Comparable<K>, V> {
 
         while (current != null) {
             if (current.key.equals(key)) {
-                current.value = value; // Обновляем значение, если ключ уже есть
+                current.value = value;
                 return;
             }
             current = current.next;

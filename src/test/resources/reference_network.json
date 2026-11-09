@@ -1,0 +1,27 @@
+{
+  "version" : 1,
+  "profiles" : [ {
+    "id" : 1,
+    "name" : "Анна",
+    "city" : "Новосибирск",
+    "birthYear" : 1999
+  }, {
+    "id" : 2,
+    "name" : "Борис",
+    "city" : "Москва",
+    "birthYear" : 1985
+  } ],
+  "communities" : [ {
+    "id" : 10,
+    "name" : "НГУ ИТ",
+    "city" : "Новосибирск",
+    "birthYear" : 2015,
+    "adminId" : 1
+  } ],
+  "deletedProfiles" : [ ],
+  "friendships" : [ {
+    "profile1" : 1,
+    "profile2" : 2,
+    "strength" : 8
+  } ]
+}

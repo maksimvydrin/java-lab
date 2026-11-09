@@ -1,15 +1,20 @@
-
 package org.example.social_network.model;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class Profile implements Editable {
+public class Profile implements Editable, Serializable {
+    private static final long serialVersionUID = 1L;
 
     private int id;
     private String name;
     private String city;
     private int birthYear;
+
+    public Profile() {
+    }
 
     public Profile(int id, String name, String city, int birthYear) {
         this.id = id;
@@ -18,59 +23,38 @@ public class Profile implements Editable {
         this.birthYear = birthYear;
     }
 
-    public int getId() {
-        return id;
-    }
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getCity() { return city; }
+    public int getBirthYear() { return birthYear; }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public int getBirthYear() {
-        return birthYear;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public void setBirthYear(int birthYear) {
-        this.birthYear = birthYear;
-    }
+    public void setId(int id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setCity(String city) { this.city = city; }
+    public void setBirthYear(int birthYear) { this.birthYear = birthYear; }
 
     @Override
     public List<String> validate() {
         List<String> errors = new ArrayList<>();
-
-        if (id <= 0) {
-            errors.add("ID должно быть > 0");
-        }
-
-        if (name == null || name.isBlank()) {
-            errors.add("Имя не может быть пустым");
-        }
-
-        if (city == null || city.isBlank()) {
-            errors.add("Название города не может быть пустым");
-        }
-
-        if (birthYear > 2026 || birthYear < 1956) {
-            errors.add("Введённый год рождения некорректен");
-        }
-
+        if (id <= 0) errors.add("ID должно быть > 0");
+        if (name == null || name.isBlank()) errors.add("Имя не может быть пустым");
+        if (city == null || city.isBlank()) errors.add("Название города не может быть пустым");
+        if (birthYear > 2026 || birthYear < 1956) errors.add("Введённый год рождения некорректен");
         return errors;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Profile profile = (Profile) o;
+        return id == profile.id && birthYear == profile.birthYear
+                && Objects.equals(name, profile.name) && Objects.equals(city, profile.city);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, city, birthYear);
     }
 
     @Override

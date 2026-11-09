@@ -57,6 +57,8 @@ public class MainApp extends javafx.application.Application {
 
     private final Controller entityController = new Controller();
     private final CsvController csvController = new CsvController();
+    private final org.example.social_network.controller.SerializationController serializationController =
+            new org.example.social_network.controller.SerializationController();
     private final SocialGraph<Integer, Profile> socialGraph = new SocialGraph<>();
 
     private GraphCanvas graphCanvas;
@@ -68,6 +70,15 @@ public class MainApp extends javafx.application.Application {
         Button addButton = new Button("Добавить");
         Button loadButton = new Button("Загрузить CSV");
         Button saveButton = new Button("Сохранить CSV");
+        Button exportButton = new Button("Экспорт (JSON/BIN)");
+        Button importButton = new Button("Импорт (JSON/BIN)");
+
+        exportButton.setOnAction(e -> serializationController.exportData(
+                stage, profiles, communities, deleted, friendships
+        ));
+        importButton.setOnAction(e -> serializationController.importData(
+                stage, profiles, communities, deleted, friendships, this::refreshTable
+        ));
 
         configureActions(stage, addButton, loadButton, saveButton);
         configureTableSelection();
@@ -108,6 +119,8 @@ public class MainApp extends javafx.application.Application {
                 editButton,
                 loadButton,
                 saveButton,
+                exportButton,
+                importButton,
                 pathButton,
                 genCountField,
                 genButton,

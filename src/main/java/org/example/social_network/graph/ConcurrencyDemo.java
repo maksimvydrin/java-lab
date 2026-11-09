@@ -4,6 +4,10 @@ import org.example.social_network.model.Profile;
 
 public class ConcurrencyDemo {
 
+    public static void main(String[] args) {
+        runDemo();
+    }
+
     public static void runDemo() {
         SocialGraph graph = new SocialGraph();
 
@@ -11,6 +15,8 @@ public class ConcurrencyDemo {
         int operationsPerThread = 250;
 
         Thread[] threads = new Thread[threadCount];
+
+        long startTime = System.currentTimeMillis();
 
         for (int i = 0; i < threadCount; i++) {
             final int threadIndex = i;
@@ -21,7 +27,7 @@ public class ConcurrencyDemo {
                         int id = threadIndex * 1000 + j + 1;
                         Profile profile = new Profile(id, "Поток " + threadIndex + " - Юзер " + j, "Город", 2000);
 
-                        graph.addVertex(profile.getId(),profile);
+                        graph.addVertex(profile.getId(), profile);
 
                         if (j > 0) {
                             graph.addEdge(id, id - 1, 5);
@@ -43,8 +49,12 @@ public class ConcurrencyDemo {
             }
         }
 
+        long endTime = System.currentTimeMillis();
+
         System.out.println("все потоки завершили работу");
         System.out.println("ожидаемый размер графа: " + (threadCount * operationsPerThread));
         System.out.println("фактический размер графа: " + graph.size());
+
+        System.out.println("затраченное время: " + (endTime - startTime) + " мс");
     }
 }

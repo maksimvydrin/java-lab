@@ -1,17 +1,20 @@
-
 package org.example.social_network.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.Serializable;
+import java.util.Objects;
 
-public final class DelProfile{
+public final class DelProfile implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private final int id;
-    private final String name;
-    private final String city;
-    private final int birthYear;
-    private final String delReason;
-    private final int dayDel;
+    private int id;
+    private String name;
+    private String city;
+    private int birthYear;
+    private String delReason;
+    private int dayDel;
+
+    public DelProfile() {
+    }
 
     public DelProfile(int id, String name, String city, int birthYear, int dayDel, String reason) {
         if (reason == null || reason.isBlank()) {
@@ -32,12 +35,34 @@ public final class DelProfile{
         this.dayDel = dayDel;
     }
 
-    public int getId() {return id;}
-    public String getName() {return name;}
-    public String getCity() {return city;}
-    public int getBirthYear() {return birthYear;}
-    public int getDayDel() {return dayDel;}
-    public String getDelReason() {return delReason;}
+    public int getId() { return id; }
+    public String getName() { return name; }
+    public String getCity() { return city; }
+    public int getBirthYear() { return birthYear; }
+    public int getDayDel() { return dayDel; }
+    public String getDelReason() { return delReason; }
+
+    public void setId(int id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setCity(String city) { this.city = city; }
+    public void setBirthYear(int birthYear) { this.birthYear = birthYear; }
+    public void setDayDel(int dayDel) { this.dayDel = dayDel; }
+    public void setDelReason(String delReason) { this.delReason = delReason; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        DelProfile that = (DelProfile) o;
+        return id == that.id && birthYear == that.birthYear && dayDel == that.dayDel
+                && Objects.equals(name, that.name) && Objects.equals(city, that.city)
+                && Objects.equals(delReason, that.delReason);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, city, birthYear, delReason, dayDel);
+    }
 
     @Override
     public String toString() {
