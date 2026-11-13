@@ -47,7 +47,7 @@ class SerializationAndBasicOpsTest {
         return new SocialNetworkData(profiles, communities, deleted, friendships);
     }
 
-    // 1. Позитивный тест: Roundtrip для JSON
+    //позитивный тест:roundtrip для JSON
     @Test
     void jsonRoundtrip_preservesDataExactly() throws IOException {
         Serializer<SocialNetworkData> serializer = new JsonSocialSerializer();
@@ -60,7 +60,7 @@ class SerializationAndBasicOpsTest {
         assertEquals(original, loaded);
     }
 
-    // 2. Позитивный тест: Roundtrip для бинарного формата
+    //позитивный тест:roundtrip для бинарного формата
     @Test
     void binRoundtrip_preservesDataExactly() throws IOException {
         Serializer<SocialNetworkData> serializer = new BinSocialSerializer();
@@ -73,7 +73,7 @@ class SerializationAndBasicOpsTest {
         assertEquals(original, loaded);
     }
 
-    // 3. Позитивный тест: Чтение эталонного JSON-файла из resources
+    //позитивный тест:чтение эталонного JSON-файла из resources
     @Test
     void jsonSerializer_loadsReferenceFileFromResources() throws IOException, URISyntaxException {
         Serializer<SocialNetworkData> serializer = new JsonSocialSerializer();
@@ -87,7 +87,7 @@ class SerializationAndBasicOpsTest {
         assertEquals(8, loaded.getFriendships()[0].getStrength());
     }
 
-    // 4. Позитивный тест: Чтение эталонного CSV-файла и проверка базовых операций графа
+    //позитивный тест:чтение эталонного CSV-файла и проверка базовых операций графа
     @Test
     void csvLoaderAndGraph_loadsReferenceCsvAndFindsShortestPath() throws Exception {
         var url = getClass().getResource("/reference_profiles.csv");
@@ -109,7 +109,7 @@ class SerializationAndBasicOpsTest {
         assertEquals(List.of(1, 2), algo.dijkstra(graph, 1, 2));
     }
 
-    // 5. Негативный тест: Битый JSON-файл вызывает IOException
+    //негативный тест:битый JSON-файл вызывает IOException
     @Test
     void jsonSerializer_throwsIOExceptionOnCorruptedFile() throws IOException {
         Serializer<SocialNetworkData> serializer = new JsonSocialSerializer();
@@ -119,7 +119,7 @@ class SerializationAndBasicOpsTest {
         assertThrows(IOException.class, () -> serializer.load(corruptedFile));
     }
 
-    // 6. Негативный тест: Битый бинарный файл вызывает IOException
+    //негативный тест:битый бинарный файл вызывает IOException
     @Test
     void binSerializer_throwsIOExceptionOnCorruptedFile() throws IOException {
         Serializer<SocialNetworkData> serializer = new BinSocialSerializer();
@@ -129,7 +129,7 @@ class SerializationAndBasicOpsTest {
         assertThrows(IOException.class, () -> serializer.load(corruptedBin));
     }
 
-    // 7. Негативный тест: Несовпадение версии формата в JSON вызывает IOException
+    //негативный тест:несовпадение версии формата в JSON вызывает IOException
     @Test
     void jsonSerializer_throwsIOExceptionOnUnsupportedVersion() throws IOException {
         Serializer<SocialNetworkData> serializer = new JsonSocialSerializer();
@@ -149,7 +149,7 @@ class SerializationAndBasicOpsTest {
         assertTrue(ex.getMessage().contains("версия"));
     }
 
-    // 8. Негативный тест: Загрузка пустого или несуществующего файла вызывает IOException
+    //негативный тест:загрузка пустого или несуществующего файла вызывает IOException
     @Test
     void serializers_throwIOExceptionOnEmptyOrMissingFile() throws IOException {
         Serializer<SocialNetworkData> jsonSerializer = new JsonSocialSerializer();

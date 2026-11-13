@@ -35,7 +35,6 @@ public final class SerializationController {
 
         Serializer<SocialNetworkData> serializer = resolveSerializer(file);
 
-        // Превращаем ObservableList от UI напрямую в массивы
         SocialNetworkData data = new SocialNetworkData(
                 profiles.toArray(new Profile[0]),
                 communities.toArray(new Community[0]),
@@ -67,7 +66,6 @@ public final class SerializationController {
         try {
             SocialNetworkData data = serializer.load(file.toPath());
 
-            // Метод setAll отлично принимает сырые массивы (varargs)
             profiles.setAll(data.getProfiles());
             communities.setAll(data.getCommunities());
             deleted.setAll(data.getDeletedProfiles());
@@ -89,7 +87,7 @@ public final class SerializationController {
                 return s;
             }
         }
-        return serializers[0]; // По умолчанию JSON
+        return serializers[0];
     }
 
     private File chooseFile(Stage stage, String title, boolean save) {

@@ -15,7 +15,6 @@ public class SocialNetworkData implements Serializable {
 
     private int version = CURRENT_VERSION;
 
-    // Используем обычные массивы вместо запрещенных List
     private Profile[] profiles = new Profile[0];
     private Community[] communities = new Community[0];
     private DelProfile[] deletedProfiles = new DelProfile[0];

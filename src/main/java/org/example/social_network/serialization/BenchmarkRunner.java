@@ -16,7 +16,6 @@ public class BenchmarkRunner {
         int runs = 5;
         Random rnd = new Random(42);
 
-        // Используем массивы вместо List и ArrayList
         Profile[] profiles = new Profile[count];
         FriendShip[] friendships = new FriendShip[count - 1]; // Связей будет на 1 меньше
 
@@ -32,7 +31,6 @@ public class BenchmarkRunner {
             profiles[i] = new Profile(id, "User_" + id, "City_" + (id % 50), 1970 + (id % 50));
 
             if (id > 1) {
-                // Заполняем массив связей
                 friendships[i - 1] = new FriendShip(id, rnd.nextInt(id - 1) + 1, 1 + rnd.nextInt(10));
             }
         }
@@ -40,7 +38,6 @@ public class BenchmarkRunner {
         SocialNetworkData data = new SocialNetworkData(profiles, communities, deleted, friendships);
 
         runBenchmark(new JsonSocialSerializer(), data, runs);
-        System.out.println("--------------------------------------------------");
         runBenchmark(new BinSocialSerializer(), data, runs);
     }
 
