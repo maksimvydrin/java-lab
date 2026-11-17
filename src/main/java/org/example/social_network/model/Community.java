@@ -7,7 +7,6 @@ import java.util.Objects;
 
 public class Community extends Profile implements Editable, Serializable {
     private static final long serialVersionUID = 1L;
-
     private int adminId;
 
     public Community() {
@@ -15,7 +14,7 @@ public class Community extends Profile implements Editable, Serializable {
     }
 
     public Community(int id, String name, String city, int birthYear, int administratorId) {
-        super(id, name, city, birthYear);
+        super(id, name, city, birthYear, 0.0);
         this.adminId = administratorId;
     }
 

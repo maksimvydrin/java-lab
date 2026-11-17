@@ -22,7 +22,8 @@ public class TableManager {
                         createColumn("ID", "id"),
                         createColumn("Имя", "name"),
                         createColumn("Город", "city"),
-                        createColumn("Год рождения", "birthYear")
+                        createColumn("Год рождения", "birthYear"),
+                        createColumn("Рейтинг", "rating")
                 );
                 table.setItems((ObservableList) profiles);
             }

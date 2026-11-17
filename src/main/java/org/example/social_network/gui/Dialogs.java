@@ -17,7 +17,8 @@ public final class Dialogs {
                 new FieldSpec("ID:", isEdit ? String.valueOf(profile.getId()) : ""),
                 new FieldSpec("Имя:", isEdit ? profile.getName() : ""),
                 new FieldSpec("Город:", isEdit ? profile.getCity() : ""),
-                new FieldSpec("Год рождения:", isEdit ? String.valueOf(profile.getBirthYear()) : "")
+                new FieldSpec("Год рождения:", isEdit ? String.valueOf(profile.getBirthYear()) : ""),
+                new FieldSpec("Рейтинг:", isEdit ? String.valueOf(profile.getRating()) : "0.0")
         );
 
         return GenericDialog.show(owner, title, fields, values -> {
@@ -25,8 +26,9 @@ public final class Dialogs {
             String name = values.get(1);
             String city = values.get(2);
             int birthYear = Integer.parseInt(values.get(3));
+            double rating = Double.parseDouble(values.get(4));
 
-            return new Profile(id, name, city, birthYear);
+            return new Profile(id, name, city, birthYear, rating);
         });
     }
 

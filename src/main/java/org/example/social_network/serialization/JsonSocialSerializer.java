@@ -2,13 +2,14 @@ package org.example.social_network.serialization;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.BiFunction;
 
 public final class JsonSocialSerializer implements Serializer<SocialNetworkData> {
-
     private final ObjectMapper mapper;
 
     public JsonSocialSerializer() {
@@ -21,32 +22,40 @@ public final class JsonSocialSerializer implements Serializer<SocialNetworkData>
     }
 
     @Override
-    public void save(SocialNetworkData data, Path file) throws IOException {
-        if (data == null) {
-            throw new IllegalArgumentException("Данные для сохранения не могут быть null");
+    public void save(SocialNetworkData data, Path file, int targetVersion) throws IOException {
+        if (data == null) throw new IllegalArgumentException("Данные для сохранения не могут быть null");
+        ObjectNode root = mapper.valueToTree(data);
+
+        if (targetVersion == 1) {
+            root = MigrationManager.downgradeJsonV2toV1(root);
         }
-        mapper.writeValue(file.toFile(), data);
+
+        mapper.writeValue(file.toFile(), root);
     }
 
     @Override
-    public SocialNetworkData load(Path file) throws IOException {
-        if (file == null || !Files.exists(file)) {
-            throw new IOException("Файл не существует: " + file);
-        }
-        if (Files.size(file) == 0) {
-            throw new IOException("Файл пуст: " + file);
+    public SocialNetworkData load(Path file, BiFunction<Integer, Integer, Boolean> migrationApprover) throws IOException {
+        if (file == null || !Files.exists(file)) throw new IOException("Файл не существует: " + file);
+        if (Files.size(file) == 0) throw new IOException("Файл пуст: " + file);
+
+        ObjectNode root = (ObjectNode) mapper.readTree(file.toFile());
+        if (root == null) throw new IOException("Не удалось прочитать данные из JSON");
+
+        int fileVersion = root.has("version") ? root.get("version").asInt() : 1;
+
+        if (fileVersion < SocialNetworkData.CURRENT_VERSION) {
+            if (migrationApprover != null && !migrationApprover.apply(fileVersion, SocialNetworkData.CURRENT_VERSION)) {
+                throw new IOException("Миграция отменена пользователем");
+            }
+            // Цепочка миграций
+            if (fileVersion == 1) {
+                root = MigrationManager.migrateJsonV1toV2(root);
+                fileVersion = 2;
+            }
+        } else if (fileVersion > SocialNetworkData.CURRENT_VERSION) {
+            throw new IOException("Файл из будущего: версия " + fileVersion);
         }
 
-        SocialNetworkData data = mapper.readValue(file.toFile(), SocialNetworkData.class);
-
-        if (data == null) {
-            throw new IOException("Не удалось прочитать данные из JSON");
-        }
-        if (data.getVersion() != SocialNetworkData.CURRENT_VERSION) {
-            throw new IOException("Неподдерживаемая версия формата JSON: " + data.getVersion()
-                    + " (ожидалась " + SocialNetworkData.CURRENT_VERSION + ")");
-        }
-
-        return data;
+        return mapper.treeToValue(root, SocialNetworkData.class);
     }
 }

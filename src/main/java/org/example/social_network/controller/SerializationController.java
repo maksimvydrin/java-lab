@@ -1,6 +1,9 @@
 package org.example.social_network.controller;
 
 import javafx.collections.ObservableList;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.example.social_network.gui.GenericDialog;
@@ -15,6 +18,8 @@ import org.example.social_network.serialization.SocialNetworkData;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
+import java.util.function.BiFunction;
 
 public final class SerializationController {
 
@@ -23,14 +28,30 @@ public final class SerializationController {
             new BinSocialSerializer()
     };
 
-    public void exportData(
-            Stage stage,
-            ObservableList<Profile> profiles,
-            ObservableList<Community> communities,
-            ObservableList<DelProfile> deleted,
-            ObservableList<FriendShip> friendships
-    ) {
-        File file = chooseFile(stage, "Экспорт данных", true);
+    public void exportData(Stage stage, ObservableList<Profile> profiles, ObservableList<Community> communities,
+                           ObservableList<DelProfile> deleted, ObservableList<FriendShip> friendships) {
+
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Выбор версии экспорта");
+        alert.setHeaderText("В какой версии сохранить файл?");
+        alert.setContentText("v2 - Текущая (с полем рейтинг)\nv1 - Старая (рейтинг будет утерян)");
+
+        ButtonType btnV2 = new ButtonType("v2 (Текущая)");
+        ButtonType btnV1 = new ButtonType("v1 (Старая)");
+        ButtonType btnCancel = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
+
+        alert.getButtonTypes().setAll(btnV2, btnV1, btnCancel);
+
+        int targetVersion = 2;
+        Optional<ButtonType> res = alert.showAndWait();
+        if (res.isEmpty() || res.get() == btnCancel) return;
+
+        if (res.get() == btnV1) {
+            targetVersion = 1;
+            GenericDialog.showAlert("При экспорте в v1 поле 'рейтинг' будет потеряно.");
+        }
+
+        File file = chooseFile(stage, "Экспорт данных (v" + targetVersion + ")", true);
         if (file == null) return;
 
         Serializer<SocialNetworkData> serializer = resolveSerializer(file);
@@ -43,49 +64,48 @@ public final class SerializationController {
         );
 
         try {
-            serializer.save(data, file.toPath());
-            GenericDialog.showAlert("Данные успешно экспортированы (" + serializer.format().toUpperCase() + ").");
+            serializer.save(data, file.toPath(), targetVersion);
+            GenericDialog.showAlert("Экспортировано (" + serializer.format().toUpperCase() + ", v" + targetVersion + ").");
         } catch (IOException e) {
             GenericDialog.showAlert("Ошибка экспорта: " + e.getMessage());
         }
     }
 
-    public void importData(
-            Stage stage,
-            ObservableList<Profile> profiles,
-            ObservableList<Community> communities,
-            ObservableList<DelProfile> deleted,
-            ObservableList<FriendShip> friendships,
-            Runnable onLoadedCallback
-    ) {
+    public void importData(Stage stage, ObservableList<Profile> profiles, ObservableList<Community> communities,
+                           ObservableList<DelProfile> deleted, ObservableList<FriendShip> friendships, Runnable onLoadedCallback) {
+
         File file = chooseFile(stage, "Импорт данных", false);
         if (file == null) return;
 
         Serializer<SocialNetworkData> serializer = resolveSerializer(file);
 
+        // Функция-коллбэк для запроса у пользователя согласия на миграцию (запускается в JavaFX-потоке)
+        BiFunction<Integer, Integer, Boolean> askMigration = (from, to) -> {
+            Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+            alert.setTitle("Миграция данных");
+            alert.setHeaderText("Файл версии " + from + ". Мигрировать до " + to + "?");
+            return alert.showAndWait().orElse(ButtonType.CANCEL) == ButtonType.OK;
+        };
+
         try {
-            SocialNetworkData data = serializer.load(file.toPath());
+            SocialNetworkData data = serializer.load(file.toPath(), askMigration);
 
             profiles.setAll(data.getProfiles());
             communities.setAll(data.getCommunities());
             deleted.setAll(data.getDeletedProfiles());
             friendships.setAll(data.getFriendships());
 
-            if (onLoadedCallback != null) {
-                onLoadedCallback.run();
-            }
-            GenericDialog.showAlert("Данные успешно импортированы (" + serializer.format().toUpperCase() + ").");
+            if (onLoadedCallback != null) onLoadedCallback.run();
+            GenericDialog.showAlert("Успешно импортировано (" + serializer.format().toUpperCase() + ").");
         } catch (IOException e) {
-            GenericDialog.showAlert("Ошибка импорта (файл повреждён или неверный формат):\n" + e.getMessage());
+            GenericDialog.showAlert("Ошибка импорта:\n" + e.getMessage());
         }
     }
 
     private Serializer<SocialNetworkData> resolveSerializer(File file) {
         String name = file.getName().toLowerCase();
         for (Serializer<SocialNetworkData> s : serializers) {
-            if (name.endsWith("." + s.format())) {
-                return s;
-            }
+            if (name.endsWith("." + s.format())) return s;
         }
         return serializers[0];
     }

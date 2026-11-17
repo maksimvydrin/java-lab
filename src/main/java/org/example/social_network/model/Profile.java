@@ -12,26 +12,35 @@ public class Profile implements Editable, Serializable {
     private String name;
     private String city;
     private int birthYear;
+    private double rating;
 
     public Profile() {
     }
 
+    // Старый конструктор (для обратной совместимости внутри кода)
     public Profile(int id, String name, String city, int birthYear) {
+        this(id, name, city, birthYear, 0.0);
+    }
+
+    public Profile(int id, String name, String city, int birthYear, double rating) {
         this.id = id;
         this.name = name;
         this.city = city;
         this.birthYear = birthYear;
+        this.rating = rating;
     }
 
     public int getId() { return id; }
     public String getName() { return name; }
     public String getCity() { return city; }
     public int getBirthYear() { return birthYear; }
+    public double getRating() {return rating;}
 
     public void setId(int id) { this.id = id; }
     public void setName(String name) { this.name = name; }
     public void setCity(String city) { this.city = city; }
     public void setBirthYear(int birthYear) { this.birthYear = birthYear; }
+    public void setRating(double rating) {this.rating = rating;}
 
     @Override
     public List<String> validate() {
@@ -40,6 +49,7 @@ public class Profile implements Editable, Serializable {
         if (name == null || name.isBlank()) errors.add("Имя не может быть пустым");
         if (city == null || city.isBlank()) errors.add("Название города не может быть пустым");
         if (birthYear > 2026 || birthYear < 1956) errors.add("Введённый год рождения некорректен");
+        if(rating < 0.0 || rating > 10.0) errors.add("Рейтинг должен быть от 0.0 до 10.0");
         return errors;
     }
 
@@ -49,16 +59,16 @@ public class Profile implements Editable, Serializable {
         if (o == null || getClass() != o.getClass()) return false;
         Profile profile = (Profile) o;
         return id == profile.id && birthYear == profile.birthYear
-                && Objects.equals(name, profile.name) && Objects.equals(city, profile.city);
+                && Double.compare(profile.rating, rating) == 0 && Objects.equals(name, profile.name) && Objects.equals(city, profile.city);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, city, birthYear);
+        return Objects.hash(id, name, city, birthYear,rating);
     }
 
     @Override
     public String toString() {
-        return id + ":" + name + "(" + city + "," + birthYear + ")";
+        return id + ":" + name + "(" + city + "," + birthYear + ") [rating  = " + rating + "        ]";
     }
 }

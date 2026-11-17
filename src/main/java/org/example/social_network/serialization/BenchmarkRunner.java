@@ -48,11 +48,11 @@ public class BenchmarkRunner {
 
         for (int i = 0; i < runs; i++) {
             long startSave = System.nanoTime();
-            serializer.save(data, tempFile);
+            serializer.save(data, tempFile, SocialNetworkData.CURRENT_VERSION);
             totalSaveNs += (System.nanoTime() - startSave);
 
             long startLoad = System.nanoTime();
-            serializer.load(tempFile);
+            serializer.load(tempFile, (oldV, newV) -> true);
             totalLoadNs += (System.nanoTime() - startLoad);
         }
 
