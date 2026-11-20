@@ -34,21 +34,29 @@ public final class SerializationController {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Выбор версии экспорта");
         alert.setHeaderText("В какой версии сохранить файл?");
-        alert.setContentText("v2 - Текущая (с полем рейтинг)\nv1 - Старая (рейтинг будет утерян)");
+        alert.setContentText(
+                "v3 - Текущая (рейтинг + заметка)\n" +
+                        "v2 - Старая (заметка будет утеряна)\n" +
+                        "v1 - Самая старая (рейтинг и заметка будут утеряны)"
+        );
 
-        ButtonType btnV2 = new ButtonType("v2 (Текущая)");
-        ButtonType btnV1 = new ButtonType("v1 (Старая)");
+        ButtonType btnV3 = new ButtonType("v3 (Текущая)");
+        ButtonType btnV2 = new ButtonType("v2");
+        ButtonType btnV1 = new ButtonType("v1");
         ButtonType btnCancel = new ButtonType("Отмена", ButtonBar.ButtonData.CANCEL_CLOSE);
 
-        alert.getButtonTypes().setAll(btnV2, btnV1, btnCancel);
+        alert.getButtonTypes().setAll(btnV3, btnV2, btnV1, btnCancel);
 
-        int targetVersion = 2;
         Optional<ButtonType> res = alert.showAndWait();
         if (res.isEmpty() || res.get() == btnCancel) return;
 
-        if (res.get() == btnV1) {
+        int targetVersion = 3;
+        if (res.get() == btnV2) {
+            targetVersion = 2;
+            GenericDialog.showAlert("Внимание! При экспорте в v2 поле 'заметка' будет потеряно.");
+        } else if (res.get() == btnV1) {
             targetVersion = 1;
-            GenericDialog.showAlert("При экспорте в v1 поле 'рейтинг' будет потеряно.");
+            GenericDialog.showAlert("Внимание! При экспорте в v1 поля 'рейтинг' и 'заметка' будут потеряны.");
         }
 
         File file = chooseFile(stage, "Экспорт данных (v" + targetVersion + ")", true);

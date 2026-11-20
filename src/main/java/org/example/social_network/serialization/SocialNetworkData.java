@@ -1,11 +1,13 @@
 package org.example.social_network.serialization;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.example.social_network.model.Community;
 import org.example.social_network.model.DelProfile;
 import org.example.social_network.model.FriendShip;
 import org.example.social_network.model.Profile;
 
-import java.io.IOException; // ДОБАВЛЕН ИМПОРТ
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Objects;
@@ -14,9 +16,13 @@ public class SocialNetworkData implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final int VERSION_1 = 1;
-    public static final int CURRENT_VERSION = 2; // Перешли на v2
+    public static final int VERSION_2 = 2;
+    public static final int CURRENT_VERSION = 3;
 
+    @JsonProperty("schema_version")
+    @JsonAlias("version")
     private int version = CURRENT_VERSION;
+
     private transient int targetVersion = CURRENT_VERSION;
 
     private Profile[] profiles = new Profile[0];
@@ -42,8 +48,6 @@ public class SocialNetworkData implements Serializable {
 
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }
-
-    // ДОБАВЛЕН НЕДОСТАЮЩИЙ МЕТОД
     public void setTargetVersion(int targetVersion) { this.targetVersion = targetVersion; }
 
     public Profile[] getProfiles() { return profiles; }
@@ -58,7 +62,6 @@ public class SocialNetworkData implements Serializable {
     public FriendShip[] getFriendships() { return friendships; }
     public void setFriendships(FriendShip[] friendships) { this.friendships = friendships; }
 
-    // Кастомная сериализация для сохранения schema_version в заголовке
     private void writeObject(java.io.ObjectOutputStream out) throws IOException {
         out.writeInt(targetVersion);
         out.defaultWriteObject();

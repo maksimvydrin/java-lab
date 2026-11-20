@@ -47,6 +47,8 @@ public final class Controller {
                 profile.setName(candidate.getName());
                 profile.setCity(candidate.getCity());
                 profile.setBirthYear(candidate.getBirthYear());
+                profile.setRating(candidate.getRating());
+                profile.setNote(candidate.getNote());
             }
 
         } else if (selected instanceof FriendShip friendship) {

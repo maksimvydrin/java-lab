@@ -24,10 +24,20 @@ public final class JsonSocialSerializer implements Serializer<SocialNetworkData>
     @Override
     public void save(SocialNetworkData data, Path file, int targetVersion) throws IOException {
         if (data == null) throw new IllegalArgumentException("Данные для сохранения не могут быть null");
-        ObjectNode root = mapper.valueToTree(data);
+        if (targetVersion < 1 || targetVersion > SocialNetworkData.CURRENT_VERSION) {
+            throw new IOException("Неподдерживаемая целевая версия для сохранения: " + targetVersion);
+        }
 
-        if (targetVersion == 1) {
-            root = MigrationManager.downgradeJsonV2toV1(root);
+        ObjectNode root = mapper.valueToTree(data);
+        int current = SocialNetworkData.CURRENT_VERSION;
+
+        while (current > targetVersion) {
+            if (current == 3) {
+                root = MigrationManager.downgradeJsonV3toV2(root);
+            } else if (current == 2) {
+                root = MigrationManager.downgradeJsonV2toV1(root);
+            }
+            current--;
         }
 
         mapper.writeValue(file.toFile(), root);
@@ -38,24 +48,45 @@ public final class JsonSocialSerializer implements Serializer<SocialNetworkData>
         if (file == null || !Files.exists(file)) throw new IOException("Файл не существует: " + file);
         if (Files.size(file) == 0) throw new IOException("Файл пуст: " + file);
 
-        ObjectNode root = (ObjectNode) mapper.readTree(file.toFile());
-        if (root == null) throw new IOException("Не удалось прочитать данные из JSON");
+        var tree = mapper.readTree(file.toFile());
+        if (!(tree instanceof ObjectNode root)) {
+            throw new IOException("Некорректная структура JSON-файла");
+        }
 
-        int fileVersion = root.has("version") ? root.get("version").asInt() : 1;
+        int fileVersion;
+        if (root.has("schema_version")) {
+            fileVersion = root.get("schema_version").asInt();
+        } else if (root.has("version")) {
+            fileVersion = root.get("version").asInt();
+        } else {
+            fileVersion = 1;
+        }
+
+        if (fileVersion < 1) {
+            throw new IOException("Некорректная версия файла: " + fileVersion);
+        }
+        if (fileVersion > SocialNetworkData.CURRENT_VERSION) {
+            throw new IOException("Файл из будущего: версия " + fileVersion
+                    + " (поддерживается до " + SocialNetworkData.CURRENT_VERSION + ")");
+        }
 
         if (fileVersion < SocialNetworkData.CURRENT_VERSION) {
             if (migrationApprover != null && !migrationApprover.apply(fileVersion, SocialNetworkData.CURRENT_VERSION)) {
                 throw new IOException("Миграция отменена пользователем");
             }
-            // Цепочка миграций
-            if (fileVersion == 1) {
-                root = MigrationManager.migrateJsonV1toV2(root);
-                fileVersion = 2;
+            while (fileVersion < SocialNetworkData.CURRENT_VERSION) {
+                if (fileVersion == 1) {
+                    root = MigrationManager.migrateJsonV1toV2(root);
+                    fileVersion = 2;
+                } else if (fileVersion == 2) {
+                    root = MigrationManager.migrateJsonV2toV3(root);
+                    fileVersion = 3;
+                }
             }
-        } else if (fileVersion > SocialNetworkData.CURRENT_VERSION) {
-            throw new IOException("Файл из будущего: версия " + fileVersion);
         }
 
-        return mapper.treeToValue(root, SocialNetworkData.class);
+        SocialNetworkData data = mapper.treeToValue(root, SocialNetworkData.class);
+        MigrationManager.validateMigratedData(data);
+        return data;
     }
 }

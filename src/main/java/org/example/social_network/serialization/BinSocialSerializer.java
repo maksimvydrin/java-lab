@@ -15,14 +15,19 @@ public final class BinSocialSerializer implements Serializer<SocialNetworkData> 
     @Override
     public void save(SocialNetworkData data, Path file, int targetVersion) throws IOException {
         if (data == null) throw new IllegalArgumentException("Данные не могут быть null");
+        if (targetVersion < 1 || targetVersion > SocialNetworkData.CURRENT_VERSION) {
+            throw new IOException("Неподдерживаемая целевая версия для сохранения: " + targetVersion);
+        }
 
-        data.setTargetVersion(targetVersion);
-        if (targetVersion == 1) MigrationManager.downgradeObjectV2toV1(data);
+        SocialNetworkData toWrite = (targetVersion < SocialNetworkData.CURRENT_VERSION)
+                ? MigrationManager.createDowngradedCopy(data, targetVersion)
+                : data;
 
+        toWrite.setTargetVersion(targetVersion);
         try (ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(Files.newOutputStream(file)))) {
-            oos.writeObject(data);
+            oos.writeObject(toWrite);
         } finally {
-            data.setTargetVersion(SocialNetworkData.CURRENT_VERSION); // Восстановление
+            toWrite.setTargetVersion(SocialNetworkData.CURRENT_VERSION);
         }
     }
 
@@ -38,16 +43,30 @@ public final class BinSocialSerializer implements Serializer<SocialNetworkData> 
             }
 
             int fileVersion = data.getVersion();
+            if (fileVersion < 1) {
+                throw new IOException("Некорректная версия файла: " + fileVersion);
+            }
+            if (fileVersion > SocialNetworkData.CURRENT_VERSION) {
+                throw new IOException("Файл из будущего: версия " + fileVersion
+                        + " (поддерживается до " + SocialNetworkData.CURRENT_VERSION + ")");
+            }
+
             if (fileVersion < SocialNetworkData.CURRENT_VERSION) {
                 if (migrationApprover != null && !migrationApprover.apply(fileVersion, SocialNetworkData.CURRENT_VERSION)) {
                     throw new IOException("Миграция отменена пользователем");
                 }
-                if (fileVersion == 1) {
-                    MigrationManager.migrateObjectV1toV2(data);
+                while (fileVersion < SocialNetworkData.CURRENT_VERSION) {
+                    if (fileVersion == 1) {
+                        MigrationManager.migrateObjectV1toV2(data);
+                        fileVersion = 2;
+                    } else if (fileVersion == 2) {
+                        MigrationManager.migrateObjectV2toV3(data);
+                        fileVersion = 3;
+                    }
                 }
-            } else if (fileVersion > SocialNetworkData.CURRENT_VERSION) {
-                throw new IOException("Файл из будущего: версия " + fileVersion);
             }
+
+            MigrationManager.validateMigratedData(data);
             return data;
         } catch (ClassNotFoundException e) {
             throw new IOException("Класс данных не найден", e);
