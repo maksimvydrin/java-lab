@@ -2,6 +2,8 @@ plugins {
     id("java")
     id("application")
     id("org.openjfx.javafxplugin") version "0.1.0"
+    id("org.springframework.boot") version "3.4.3"
+    id("io.spring.dependency-management") version "1.1.7"
 }
 
 group = "org.example"
@@ -27,10 +29,8 @@ application {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.17.0")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
-    testImplementation(platform("org.junit:junit-bom:5.10.2 "))
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    implementation("org.springframework.boot:spring-boot-starter-web")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -46,4 +46,7 @@ tasks.withType<JavaExec> {
     systemProperty("file.encoding", "UTF-8")
     systemProperty("sun.stdout.encoding", "UTF-8")
     systemProperty("sun.stderr.encoding", "UTF-8")
+}
+tasks.withType<JavaCompile> {
+    options.release.set(21)
 }

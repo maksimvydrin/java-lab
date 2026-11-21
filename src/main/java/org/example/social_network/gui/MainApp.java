@@ -1,6 +1,12 @@
 
 package org.example.social_network.gui;
 
+import javafx.application.Platform;
+import org.example.social_network.server.ServerApp;
+import org.example.social_network.server.SocialNetworkService;
+import org.springframework.boot.builder.SpringApplicationBuilder;
+import org.springframework.context.ConfigurableApplicationContext;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -63,9 +69,31 @@ public class MainApp extends javafx.application.Application {
 
     private GraphCanvas graphCanvas;
 
+    private ConfigurableApplicationContext springContext;
+    private SocialNetworkService service;
+
+    @Override
+    public void init() {
+        springContext = new SpringApplicationBuilder(ServerApp.class)
+                .headless(false)
+                .run();
+        service = springContext.getBean(SocialNetworkService.class);
+    }
+
+    @Override
+    public void stop() {
+        if (springContext != null) {
+            springContext.close();
+        }
+    }
+
+
     @Override
     public void start(Stage stage) {
         configureTypeBox();
+
+        service.addChangeListener(() -> Platform.runLater(this::syncFromService));
+        syncFromService();
 
         Button addButton = new Button("Добавить");
         Button loadButton = new Button("Загрузить CSV");
@@ -333,5 +361,15 @@ public class MainApp extends javafx.application.Application {
 
     public static void main(String[] args) {
         launch(args);
+    }
+
+
+    private void syncFromService() {
+        var store = service.getStore();
+        profiles.setAll(store.getProfiles());
+        communities.setAll(store.getCommunities());
+        deleted.setAll(store.getDeletedProfiles());
+        friendships.setAll(store.getFriendships());
+        refreshTable();
     }
 }
